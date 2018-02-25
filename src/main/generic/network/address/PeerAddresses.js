@@ -792,7 +792,7 @@ PeerAddresses.DEFAULT_BAN_TIME = 1000 * 60 * 10; // 10 minutes
 PeerAddresses.INITIAL_FAILED_BACKOFF = 1000 * 15; // 15 seconds
 PeerAddresses.MAX_FAILED_BACKOFF = 1000 * 60 * 10; // 10 minutes
 PeerAddresses.SEED_PEERS = [
-    WsPeerAddress.seed('krill-network.com', 8080, 'e65e39616662f2c16d62dc08915e5a1d104619db8c2b9cf9b389f96c8dce9837')
+    WsPeerAddress.seed('krillcoin-network.com', 8080, 'e65e39616662f2c16d62dc08915e5a1d104619db8c2b9cf9b389f96c8dce9837')
 ];
 Class.register(PeerAddresses);
 
