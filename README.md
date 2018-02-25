@@ -1,4 +1,4 @@
-# KrillCoin Blockchain
+# KrillCoin Blockchain [ ![Codeship Status for krillcoin/core](https://app.codeship.com/projects/10d50050-fc36-0135-f11e-522d288f3c19/status?branch=master)](https://app.codeship.com/projects/279023)
 
 **[KrillCoin](https://krillcoin.com/)** is a frictionless payment protocol for the web.
 
