@@ -1,8 +1,6 @@
-# Krill Blockchain [![Build Status](https://travis-ci.org/krill-network/core.svg)](https://travis-ci.org/krill-network/core)
+# KrillCoin Blockchain
 
-**[Krill](https://krillcoin.com/)** is a frictionless payment protocol for the web.
-
-For a high-level introduction check out the [Krill White Paper](https://medium.com/krill-network/krill-a-peer-to-peer-payment-protocol-native-to-the-web-ffd324bb084).
+**[KrillCoin](https://krillcoin.com/)** is a frictionless payment protocol for the web.
 
 To dive into the details of the protocol architecture check out the [Krill Developer Reference](https://krillcoin.com/developer-reference).
 
