@@ -15,16 +15,16 @@
     "lint": "gulp eslint"
   },
   "author": {
-    "name": "The Krill Core Development Team",
+    "name": "The Krillcoin Core Development Team",
     "url": "https://krillcoin.com/"
   },
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/krill-network/core/issues"
+    "url": "https://github.com/krillcoin-network/core/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/krill-network/core.git"
+    "url": "https://github.com/krillcoin-network/core.git"
   },
   "engines": {
     "node": ">=7.9.0"

@@ -12,7 +12,7 @@ class DevUi {
         this._startInstance(this.clientType).then($ => {
             this.$ = $;
             window.$ = $;
-            return this._loadUiComponents(); // load ui components after core as some extend Krill.Observable
+            return this._loadUiComponents(); // load ui components after core as some extend Krillcoin.Observable
         }).then(() => this._initUi());
     }
 
@@ -48,12 +48,12 @@ class DevUi {
 
     _startInstance() {
         return new Promise(resolve => {
-            Krill.init(() => {
+            Krillcoin.init(() => {
                 const $ = {};
                 $.clientType = this.clientType;
                 Promise.all([
-                    Krill.Consensus[this.clientType](),
-                    new Krill.WalletStore()
+                    Krillcoin.Consensus[this.clientType](),
+                    new Krillcoin.WalletStore()
                 ]).then(promiseResults => {
                     $.consensus = promiseResults[0];
 
@@ -64,7 +64,7 @@ class DevUi {
 
                     if (this.clientType !== DevUi.ClientType.NANO) {
                         $.accounts = $.blockchain.accounts;
-                        $.miner = new Krill.Miner($.blockchain, $.accounts, $.mempool, $.network.time, null);
+                        $.miner = new Krillcoin.Miner($.blockchain, $.accounts, $.mempool, $.network.time, null);
                     }
 
                     $.walletStore = promiseResults[1];
@@ -74,14 +74,14 @@ class DevUi {
                 });
             }, (code) => {
                 switch (code) {
-                    case Krill.ERR_WAIT:
+                    case Krillcoin.ERR_WAIT:
                         this.$overlay.style.display = 'block';
                         break;
-                    case Krill.ERR_UNSUPPORTED:
+                    case Krillcoin.ERR_UNSUPPORTED:
                         alert('Browser not supported');
                         break;
                     default:
-                        alert('Krill initialization error');
+                        alert('Krillcoin initialization error');
                         break;
                 }
             });

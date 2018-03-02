@@ -12,9 +12,9 @@ class IWorker {
             return IWorker._workerImplementation[clazz.name];
         } else {
             if (!workerScript) {
-                workerScript = `${Krill._path}worker.js`;
+                workerScript = `${Krillcoin._path}worker.js`;
             }
-            return IWorker.createProxy(clazz, name, new Worker(window.URL.createObjectURL(new Blob([`Krill = {_path: '${Krill._path}'}; importScripts('${workerScript.replace(/'/g, '')}');`]))));
+            return IWorker.createProxy(clazz, name, new Worker(window.URL.createObjectURL(new Blob([`Krillcoin = {_path: '${Krillcoin._path}'}; importScripts('${workerScript.replace(/'/g, '')}');`]))));
         }
     }
 
@@ -195,7 +195,7 @@ class IWorker {
 
             importScript(script, module = 'Module') {
                 if (module && IWorker._global[module] && IWorker._global[module].asm) return false;
-                if (typeof Krill !== 'undefined' && Krill._path) script = `${Krill._path}${script}`;
+                if (typeof Krillcoin !== 'undefined' && Krillcoin._path) script = `${Krillcoin._path}${script}`;
                 if (typeof __dirname === 'string' && script.indexOf('/') === -1) script = `${__dirname}/${script}`;
 
                 const moduleSettings = IWorker._global[module] || {};
@@ -240,7 +240,7 @@ class IWorker {
              * @returns {Promise.<boolean>}
              */
             importWasm(wasm, module = 'Module') {
-                if (typeof Krill !== 'undefined' && Krill._path) wasm = `${Krill._path}${wasm}`;
+                if (typeof Krillcoin !== 'undefined' && Krillcoin._path) wasm = `${Krillcoin._path}${wasm}`;
                 if (typeof __dirname === 'string' && wasm.indexOf('/') === -1) wasm = `${__dirname}/${wasm}`;
                 if (!IWorker._global.WebAssembly) {
                     Log.w(IWorker, 'No support for WebAssembly available.');

@@ -102,6 +102,17 @@ class Transaction {
      * @returns {boolean}
      */
     verify() {
+        if (this._valid === undefined) {
+            this._valid = this._verify();
+        }
+        return this._valid;
+    }
+
+    /**
+     * @returns {boolean}
+     * @private
+     */
+    _verify() {
         // Check that sender != recipient.
         if (this._recipient.equals(this._sender)) {
             Log.w(Transaction, 'Sender and recipient must not match', this);

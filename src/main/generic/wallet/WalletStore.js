@@ -1,4 +1,4 @@
-// TODO: Move outside of Krill Core library?
+// TODO: Move outside of Krillcoin Core library?
 class WalletStore {
     /**
      * @returns {Promise.<WalletStore>}

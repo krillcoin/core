@@ -199,9 +199,9 @@ isarray@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
 
-jungle-db@krill-network/jungle-db#v0.3.7-alpha.1:
+jungle-db@krillcoin-network/jungle-db#v0.3.7-alpha.1:
   version "0.3.6"
-  resolved "https://codeload.github.com/krill-network/jungle-db/tar.gz/cf083cadc8484166ef0568dfde0c8aa6b984f026"
+  resolved "https://codeload.github.com/krillcoin-network/jungle-db/tar.gz/cf083cadc8484166ef0568dfde0c8aa6b984f026"
   dependencies:
     fs "^0.0.1-security"
     level-sublevel "^6.6.1"
@@ -317,13 +317,13 @@ nan@~2.6.1:
   version "2.6.2"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.6.2.tgz#e4ff34e6c95fdfb5aecc08de6596f43605a7db45"
 
-krill@../..:
+krillcoin@../..:
   version "1.0.0"
   dependencies:
     atob "^2.0.3"
     btoa "^1.1.2"
     chalk "^1.1.3"
-    jungle-db krill-network/jungle-db#v0.3.7-alpha.1
+    jungle-db krillcoin-network/jungle-db#v0.3.7-alpha.1
     leveldown "^1.6.0"
     levelup "^1.3.5"
     nan "^2.7.0"

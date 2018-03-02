@@ -7,7 +7,7 @@
 #else
     #include <arpa/inet.h>
 #endif
-#include "krill_native.h"
+#include "krillcoin_native.h"
 
 static inline uint16_t bswap_16(uint16_t x) {
   return (x>>8) | (x<<8);
@@ -21,9 +21,9 @@ static inline uint64_t bswap_64(uint64_t x) {
   return (((uint64_t)bswap_32(x&0xffffffffull))<<32) | (bswap_32(x>>32));
 }
 
-uint64_t krill_htonll_test = 42;
-uint64_t krill_htonll(uint64_t in) {
-    if(*(uint8_t*)&krill_htonll_test == 42) {
+uint64_t krillcoin_htonll_test = 42;
+uint64_t krillcoin_htonll(uint64_t in) {
+    if(*(uint8_t*)&krillcoin_htonll_test == 42) {
         return bswap_64(in);
     }
     return in;
@@ -63,7 +63,7 @@ void uint256_set_compact(uint256 out, uint32_t compact) {
 
 void uint256_set_bytes(uint256 out, uint8_t* bytes) {
     uint64_t* in = (uint64_t*)bytes;
-    for(int i = 0; i < 4; ++i) out[i] = krill_htonll(in[i]);
+    for(int i = 0; i < 4; ++i) out[i] = krillcoin_htonll(in[i]);
 }
 
 int8_t uint256_compare(uint256 left, uint256 right) {
@@ -74,38 +74,38 @@ int8_t uint256_compare(uint256 left, uint256 right) {
     return 0;
 }
 
-int krill_blake2(void *out, const void *in, const size_t inlen) {
+int krillcoin_blake2(void *out, const void *in, const size_t inlen) {
     return blake2b(out, 32, in, inlen, NULL, 0);
 }
 
-void krill_sha256(void *out, const void *in, const size_t inlen) {
+void krillcoin_sha256(void *out, const void *in, const size_t inlen) {
     SHA256_CTX ctx;
     sha256_init(&ctx);
     sha256_update(&ctx, in, inlen);
     sha256_final(&ctx, out);
 }
 
-int krill_argon2(void *out, const void *in, const size_t inlen, const uint32_t m_cost) {
-    return argon2d_hash_raw(1, m_cost == 0 ? KRILL_DEFAULT_ARGON2_COST : m_cost, 1, in, inlen, KRILL_ARGON2_SALT, KRILL_ARGON2_SALT_LEN, out, 32);
+int krillcoin_argon2(void *out, const void *in, const size_t inlen, const uint32_t m_cost) {
+    return argon2d_hash_raw(1, m_cost == 0 ? KRILLCOIN_DEFAULT_ARGON2_COST : m_cost, 1, in, inlen, KRILLCOIN_ARGON2_SALT, KRILLCOIN_ARGON2_SALT_LEN, out, 32);
 }
 
-int krill_kdf(void *out, const void *in, const size_t inlen, const void* seed, const size_t seedlen, const uint32_t m_cost, const uint32_t iter) {
+int krillcoin_kdf(void *out, const void *in, const size_t inlen, const void* seed, const size_t seedlen, const uint32_t m_cost, const uint32_t iter) {
     int ret, i;
-    ret = argon2d_hash_raw(1, m_cost == 0 ? KRILL_DEFAULT_ARGON2_COST : m_cost, 1, in, inlen, seed, seedlen, out, 32);
+    ret = argon2d_hash_raw(1, m_cost == 0 ? KRILLCOIN_DEFAULT_ARGON2_COST : m_cost, 1, in, inlen, seed, seedlen, out, 32);
     if (ret != ARGON2_OK) return ret;
     for(i = 0; i < iter; ++i) {
-        ret = argon2d_hash_raw(1, m_cost == 0 ? KRILL_DEFAULT_ARGON2_COST : m_cost, 1, out, 32, seed, seedlen, out, 32);
+        ret = argon2d_hash_raw(1, m_cost == 0 ? KRILLCOIN_DEFAULT_ARGON2_COST : m_cost, 1, out, 32, seed, seedlen, out, 32);
         if (ret != ARGON2_OK) return ret;
     }
     return ARGON2_OK;
 }
 
-uint32_t krill_argon2_target(void *out, void *in, const size_t inlen, const uint32_t compact, const uint32_t min_nonce, const uint32_t max_nonce, const uint32_t m_cost) {
+uint32_t krillcoin_argon2_target(void *out, void *in, const size_t inlen, const uint32_t compact, const uint32_t min_nonce, const uint32_t max_nonce, const uint32_t m_cost) {
     uint32_t* noncer = (uint32_t*)(((uint8_t*)in)+inlen-4);
     uint256 target = uint256_new(), hash = uint256_new();
     uint256_set_compact(target, compact);
     for(noncer[0] = htonl(min_nonce); ntohl(noncer[0]) < max_nonce; noncer[0] = htonl(ntohl(noncer[0])+1)) {
-        krill_argon2(out, in, inlen, m_cost);
+        krillcoin_argon2(out, in, inlen, m_cost);
         uint256_set_bytes(hash, out);
         if (uint256_compare(target, hash) > 0) {
             break;
@@ -116,9 +116,9 @@ uint32_t krill_argon2_target(void *out, void *in, const size_t inlen, const uint
     return ntohl(noncer[0]);
 }
 
-int krill_argon2_verify(const void *hash, const void *in, const size_t inlen, const uint32_t m_cost) {
+int krillcoin_argon2_verify(const void *hash, const void *in, const size_t inlen, const uint32_t m_cost) {
     void* out = malloc(32);
-    krill_argon2(out, in, inlen, m_cost);
+    krillcoin_argon2(out, in, inlen, m_cost);
     int res = memcmp(hash, out, 32);
     free(out);
     return res;

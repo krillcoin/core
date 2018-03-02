@@ -1,4 +1,4 @@
-const Krill = require('../../dist/node.js');
+const Krillcoin = require('../../dist/node.js');
 const JsonRpcServer = require('./JsonRpcServer.js');
 const MetricsServer = require('./MetricsServer.js');
 const START = Date.now();
@@ -11,7 +11,7 @@ const type = typeof argv.type === 'string' ? argv.type : 'full';
 
 if ((!argv.host || !argv.port || !argv.key || !argv.cert) && !argv.dumb || argv.help || (type !== 'full' && type !== 'light' && type !== 'nano')) {
     console.log(
-        'Krill NodeJS client\n' +
+        'Krillcoin NodeJS client\n' +
         '\n' +
         'Usage:\n' +
         '    node index.js --host=HOSTNAME --port=PORT --cert=SSL_CERT_FILE --key=SSL_KEY_FILE [options]\n' +
@@ -95,7 +95,7 @@ if (metrics && isNano) {
 }
 
 if (argv['log']) {
-    Krill.Log.instance.level = argv['log'] === true ? Krill.Log.VERBOSE : argv['log'];
+    Krillcoin.Log.instance.level = argv['log'] === true ? Krillcoin.Log.VERBOSE : argv['log'];
 }
 if (argv['log-tag']) {
     if (!Array.isArray(argv['log-tag'])) {
@@ -103,7 +103,7 @@ if (argv['log-tag']) {
     }
     argv['log-tag'].forEach((lt) => {
         const s = lt.split(':');
-        Krill.Log.instance.setLoggable(s[0], s.length === 1 ? 2 : s[1]);
+        Krillcoin.Log.instance.setLoggable(s[0], s.length === 1 ? 2 : s[1]);
     });
 }
 
@@ -112,7 +112,7 @@ if (walletSeed && walletAddress) {
     process.exit(1);
 }
 
-console.log(`Krill NodeJS Client starting (${host && port ? `host=${host}, port=${port}` : 'dumb'}, miner=${!!minerOptions}, statistics=${!!statisticsOptions}, passive=${!!passive}, rpc=${!!rpc})`);
+console.log(`Krillcoin NodeJS Client starting (${host && port ? `host=${host}, port=${port}` : 'dumb'}, miner=${!!minerOptions}, statistics=${!!statisticsOptions}, passive=${!!passive}, rpc=${!!rpc})`);
 
 const TAG = 'Node';
 
@@ -120,18 +120,18 @@ const $ = {};
 
 (async () => {
     const networkConfig = dumb
-        ? new Krill.DumbNetworkConfig()
-        : new Krill.WsNetworkConfig(host, port, key, cert);
+        ? new Krillcoin.DumbNetworkConfig()
+        : new Krillcoin.WsNetworkConfig(host, port, key, cert);
 
     switch (type) {
         case 'full':
-            $.consensus = await Krill.Consensus.full(networkConfig);
+            $.consensus = await Krillcoin.Consensus.full(networkConfig);
             break;
         case 'light':
-            $.consensus = await Krill.Consensus.light(networkConfig);
+            $.consensus = await Krillcoin.Consensus.light(networkConfig);
             break;
         case 'nano':
-            $.consensus = await Krill.Consensus.nano(networkConfig);
+            $.consensus = await Krillcoin.Consensus.nano(networkConfig);
             break;
     }
 
@@ -140,21 +140,21 @@ const $ = {};
     $.mempool = $.consensus.mempool;
     $.network = $.consensus.network;
 
-    Krill.Log.i(TAG, `Peer address: ${networkConfig.peerAddress.toString()} - public key: ${networkConfig.keyPair.publicKey.toHex()}`);
+    Krillcoin.Log.i(TAG, `Peer address: ${networkConfig.peerAddress.toString()} - public key: ${networkConfig.keyPair.publicKey.toHex()}`);
 
     // TODO: Wallet key.
-    $.walletStore = await new Krill.WalletStore();
+    $.walletStore = await new Krillcoin.WalletStore();
     if (!walletAddress && !walletSeed) {
         // Load or create default wallet.
         $.wallet = await $.walletStore.getDefault();
     } else if (walletSeed) {
         // Load wallet from seed.
-        const mainWallet = await Krill.Wallet.loadPlain(walletSeed);
+        const mainWallet = await Krillcoin.Wallet.loadPlain(walletSeed);
         await $.walletStore.put(mainWallet);
         await $.walletStore.setDefault(mainWallet.address);
         $.wallet = mainWallet;
     } else {
-        const address = Krill.Address.fromUserFriendlyAddress(walletAddress);
+        const address = Krillcoin.Address.fromUserFriendlyAddress(walletAddress);
         $.wallet = {address: address};
         // Check if we have a full wallet in store.
         const wallet = await $.walletStore.get(address);
@@ -165,22 +165,22 @@ const $ = {};
     }
 
     const addresses = await $.walletStore.list();
-    Krill.Log.i(TAG, `Managing wallets [${addresses.map(address => address.toUserFriendlyAddress())}]`);
+    Krillcoin.Log.i(TAG, `Managing wallets [${addresses.map(address => address.toUserFriendlyAddress())}]`);
 
     const account = !isNano ? await $.accounts.get($.wallet.address) : null;
-    Krill.Log.i(TAG, `Wallet initialized for address ${$.wallet.address.toUserFriendlyAddress()}.`
-        + (!isNano ? ` Balance: ${Krill.Policy.satoshisToCoins(account.balance)} NIM` : ''));
+    Krillcoin.Log.i(TAG, `Wallet initialized for address ${$.wallet.address.toUserFriendlyAddress()}.`
+        + (!isNano ? ` Balance: ${Krillcoin.Policy.satoshisToCoins(account.balance)} NIM` : ''));
 
-    $.miner = new Krill.Miner($.blockchain, $.accounts, $.mempool, $.network.time, $.wallet.address);
+    $.miner = new Krillcoin.Miner($.blockchain, $.accounts, $.mempool, $.network.time, $.wallet.address);
 
     $.blockchain.on('head-changed', (head) => {
         if ($.consensus.established || head.height % 100 === 0) {
-            Krill.Log.i(TAG, `Now at block: ${head.height}`);
+            Krillcoin.Log.i(TAG, `Now at block: ${head.height}`);
         }
     });
 
     $.network.on('peer-joined', (peer) => {
-        Krill.Log.i(TAG, `Connected to ${peer.peerAddress.toString()}`);
+        Krillcoin.Log.i(TAG, `Connected to ${peer.peerAddress.toString()}`);
     });
 
     if (!passive) {
@@ -204,12 +204,12 @@ const $ = {};
     }
 
     $.consensus.on('established', () => {
-        Krill.Log.i(TAG, `Blockchain ${type}-consensus established in ${(Date.now() - START) / 1000}s.`);
-        Krill.Log.i(TAG, `Current state: height=${$.blockchain.height}, totalWork=${$.blockchain.totalWork}, headHash=${$.blockchain.headHash.toBase64()}`);
+        Krillcoin.Log.i(TAG, `Blockchain ${type}-consensus established in ${(Date.now() - START) / 1000}s.`);
+        Krillcoin.Log.i(TAG, `Current state: height=${$.blockchain.height}, totalWork=${$.blockchain.totalWork}, headHash=${$.blockchain.headHash.toBase64()}`);
     });
 
     $.miner.on('block-mined', (block) => {
-        Krill.Log.i(TAG, `Block mined: ${block.header}`);
+        Krillcoin.Log.i(TAG, `Block mined: ${block.header}`);
     });
 
     if (statisticsOptions) {
@@ -223,8 +223,8 @@ const $ = {};
             if (hashrates.length >= outputInterval) {
                 const account = await $.accounts.get($.wallet.address);
                 const sum = hashrates.reduce((acc, val) => acc + val, 0);
-                Krill.Log.i(TAG, `Hashrate: ${(sum / hashrates.length).toFixed(Math.log10(hashrates.length)).padStart(7)} H/s`
-                    + (!isNano ? ` - Balance: ${Krill.Policy.satoshisToCoins(account.balance)} NIM` : '')
+                Krillcoin.Log.i(TAG, `Hashrate: ${(sum / hashrates.length).toFixed(Math.log10(hashrates.length)).padStart(7)} H/s`
+                    + (!isNano ? ` - Balance: ${Krillcoin.Policy.satoshisToCoins(account.balance)} NIM` : '')
                     + ` - Mempool: ${$.mempool.getTransactions().length} tx`);
                 hashrates.length = 0;
             }

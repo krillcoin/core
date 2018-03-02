@@ -15,7 +15,7 @@ class WebSocketFactory {
 
         const httpsServer = https.createServer(options, (req, res) => {
             res.writeHead(200);
-            res.end('Krill NodeJS Client\n');
+            res.end('Krillcoin NodeJS Client\n');
         }).listen(port);
 
         return new WebSocket.Server({ server: httpsServer });

@@ -1,4 +1,4 @@
-class TransactionUi extends Krill.Observable {
+class TransactionUi extends Krillcoin.Observable {
     constructor(el, $) {
         super();
         this.$el = el;
@@ -91,12 +91,12 @@ class TransactionUi extends Krill.Observable {
             this.$plainSenderType.value = tx.senderType;
             this.$recipient.value = tx.recipient.toUserFriendlyAddress();
             this.$recipientType.value = tx.recipientType;
-            this.$value.value = Krill.Policy.satoshisToCoins(tx.value);
-            this.$fee.value = Krill.Policy.satoshisToCoins(tx.fee);
+            this.$value.value = Krillcoin.Policy.satoshisToCoins(tx.value);
+            this.$fee.value = Krillcoin.Policy.satoshisToCoins(tx.fee);
             this.$validityStart.value = tx.validityStartHeight;
             this.$plainFlags.value = tx.flags;
-            this.$plainData.value = Krill.BufferUtils.toBase64(tx.data);
-            this.$plainProof.value = Krill.BufferUtils.toBase64(tx.proof);
+            this.$plainData.value = Krillcoin.BufferUtils.toBase64(tx.data);
+            this.$plainProof.value = Krillcoin.BufferUtils.toBase64(tx.proof);
         });
     }
 
@@ -108,7 +108,7 @@ class TransactionUi extends Krill.Observable {
             transaction = tx;
             return Utils.broadcastTransaction(this.$, transaction);
         }).then(() => {
-            if (transaction.hasFlag(Krill.Transaction.Flag.CONTRACT_CREATION)) {
+            if (transaction.hasFlag(Krillcoin.Transaction.Flag.CONTRACT_CREATION)) {
                 const contractAddress = transaction.getContractCreationAddress();
                 this.$contractAddress.parentNode.style.display = 'block';
                 this.$contractAddress.textContent = contractAddress.toUserFriendlyAddress();
@@ -145,8 +145,8 @@ class TransactionUi extends Krill.Observable {
             validityStart = Utils.readNumber(this.$validityStart);
         }
         if (value === null || fee === null || validityStart === null) return null;
-        value = Krill.Policy.coinsToSatoshis(value);
-        fee = Krill.Policy.coinsToSatoshis(fee);
+        value = Krillcoin.Policy.coinsToSatoshis(value);
+        fee = Krillcoin.Policy.coinsToSatoshis(fee);
         return {
             value: value,
             fee: fee,
@@ -200,7 +200,7 @@ class TransactionUi extends Krill.Observable {
         const canonicals = this._readTransactionCanonicals();
         const recipient = Utils.readAddress(this.$recipient);
         if (canonicals === null || recipient === null) return null;
-        return new Krill.BasicTransaction(sender.publicKey, recipient,
+        return new Krillcoin.BasicTransaction(sender.publicKey, recipient,
             canonicals.value, canonicals.fee, canonicals.validityStart);
     }
 
@@ -209,9 +209,9 @@ class TransactionUi extends Krill.Observable {
         const recipient = Utils.readAddress(this.$recipient);
         const recipientType = Utils.readNumber(this.$recipientType);
         if (canonicals === null || recipient === null || recipientType === null) return null;
-        const freeformData = Krill.BufferUtils.fromAscii(this.$freeformData.value);
-        return new Krill.ExtendedTransaction(sender.address, sender.type, recipient, recipientType, canonicals.value,
-            canonicals.fee, canonicals.validityStart, Krill.Transaction.Flag.NONE, freeformData);
+        const freeformData = Krillcoin.BufferUtils.fromAscii(this.$freeformData.value);
+        return new Krillcoin.ExtendedTransaction(sender.address, sender.type, recipient, recipientType, canonicals.value,
+            canonicals.fee, canonicals.validityStart, Krillcoin.Transaction.Flag.NONE, freeformData);
     }
 
     _generatePlainExtendedTransaction() {
@@ -227,7 +227,7 @@ class TransactionUi extends Krill.Observable {
             recipientType === null || flags === null || data === null || proof === null) {
             return null;
         }
-        return new Krill.ExtendedTransaction(senderAddress, senderType, recipient, recipientType,
+        return new Krillcoin.ExtendedTransaction(senderAddress, senderType, recipient, recipientType,
             canonicals.value, canonicals.fee, canonicals.validityStart, flags, data, proof);
     }
 
@@ -251,15 +251,15 @@ class TransactionUi extends Krill.Observable {
             vestingStart = Utils.readNumber(this.$vestingStart);
             vestingStepAmount = Utils.readNumber(this.$vestingStepAmount);
             if (vestingStart === null || vestingStepAmount === null) return null;
-            vestingStepAmount = Krill.Policy.coinsToSatoshis(vestingStepAmount);
+            vestingStepAmount = Krillcoin.Policy.coinsToSatoshis(vestingStepAmount);
         }
         if (requiresVestingTotalAmount) {
             vestingTotalAmount = Utils.readNumber(this.$vestingTotalAmount);
             if (vestingTotalAmount === null) return null;
-            vestingTotalAmount = Krill.Policy.coinsToSatoshis(vestingTotalAmount);
+            vestingTotalAmount = Krillcoin.Policy.coinsToSatoshis(vestingTotalAmount);
         }
 
-        const buffer = new Krill.SerialBuffer(bufferSize);
+        const buffer = new Krillcoin.SerialBuffer(bufferSize);
         vestingOwner.serialize(buffer);
 
         if (requiresVestingStartAndStepAmount) {
@@ -273,10 +273,10 @@ class TransactionUi extends Krill.Observable {
             buffer.writeUint32(vestingStepBlocks);
         }
 
-        const recipient = Krill.Address.CONTRACT_CREATION;
-        const recipientType = Krill.Account.Type.VESTING;
-        const flags = Krill.Transaction.Flag.CONTRACT_CREATION;
-        return new Krill.ExtendedTransaction(sender.address, sender.type, recipient, recipientType,
+        const recipient = Krillcoin.Address.CONTRACT_CREATION;
+        const recipientType = Krillcoin.Account.Type.VESTING;
+        const flags = Krillcoin.Transaction.Flag.CONTRACT_CREATION;
+        return new Krillcoin.ExtendedTransaction(sender.address, sender.type, recipient, recipientType,
             canonicals.value, canonicals.fee, canonicals.validityStart, flags, buffer);
     }
 
@@ -284,13 +284,13 @@ class TransactionUi extends Krill.Observable {
         const canonicals = this._readTransactionCanonicals();
         const htlcSender = this._htlcSender.selectedAddress;
         const htlcRecipient = this._htlcRecipient.selectedAddress;
-        const hashAlgo = Krill.Hash.Algorithm[this.$htlcHashAlgo.value.toUpperCase()];
+        const hashAlgo = Krillcoin.Hash.Algorithm[this.$htlcHashAlgo.value.toUpperCase()];
         const hashCount = Utils.readNumber(this.$htlcHashCount);
         const timeout = Utils.readNumber(this.$htlcTimeout);
         if (canonicals === null || htlcSender === null || htlcRecipient === null || hashAlgo === undefined
             || hashCount === null || timeout === null) return null;
 
-        let hashRoot = Krill.BufferUtils.fromAscii(this.$htlcHashPreImage.value);
+        let hashRoot = Krillcoin.BufferUtils.fromAscii(this.$htlcHashPreImage.value);
         hashRoot = Utils.hash(hashRoot, hashAlgo); // hash once to make sure we get a hash
         for (let i = 0; i < hashCount; ++i) {
             hashRoot = Utils.hash(hashRoot, hashAlgo);
@@ -302,7 +302,7 @@ class TransactionUi extends Krill.Observable {
             + hashRoot.byteLength
             + /* hashCount */ 1
             + /* timeout */ 4;
-        const buffer =  new Krill.SerialBuffer(bufferSize);
+        const buffer =  new Krillcoin.SerialBuffer(bufferSize);
         htlcSender.serialize(buffer);
         htlcRecipient.serialize(buffer);
         buffer.writeUint8(hashAlgo);
@@ -310,10 +310,10 @@ class TransactionUi extends Krill.Observable {
         buffer.writeUint8(hashCount);
         buffer.writeUint32(timeout);
 
-        const recipient = Krill.Address.CONTRACT_CREATION;
-        const recipientType = Krill.Account.Type.HTLC;
-        const flags = Krill.Transaction.Flag.CONTRACT_CREATION;
-        return new Krill.ExtendedTransaction(sender.address, sender.type, recipient, recipientType,
+        const recipient = Krillcoin.Address.CONTRACT_CREATION;
+        const recipientType = Krillcoin.Account.Type.HTLC;
+        const flags = Krillcoin.Transaction.Flag.CONTRACT_CREATION;
+        return new Krillcoin.ExtendedTransaction(sender.address, sender.type, recipient, recipientType,
             canonicals.value, canonicals.fee, canonicals.validityStart, flags, buffer);
     }
 }

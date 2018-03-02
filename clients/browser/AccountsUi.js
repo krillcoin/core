@@ -1,4 +1,4 @@
-class AccountsUi extends Krill.Observable {
+class AccountsUi extends Krillcoin.Observable {
     constructor(el, $) {
         super();
         this.$el = el;
@@ -134,15 +134,15 @@ class AccountsUi extends Krill.Observable {
     _getContractList(contractType) {
         let localStorageList, listEl;
         switch (contractType) {
-            case Krill.Account.Type.VESTING:
+            case Krillcoin.Account.Type.VESTING:
                 localStorageList = this._vestingAccountList;
                 listEl = this.$vestingAccountList;
                 break;
-            case Krill.Account.Type.HTLC:
+            case Krillcoin.Account.Type.HTLC:
                 localStorageList = this._htlcAccountList;
                 listEl = this.$htlcAccountList;
                 break;
-            case Krill.Account.Type.BASIC:
+            case Krillcoin.Account.Type.BASIC:
                 localStorageList = this._pendingContractsList;
                 listEl = this.$pendingContractsList;
                 break;
@@ -155,7 +155,7 @@ class AccountsUi extends Krill.Observable {
 
     _addWallet() {
         let wallet;
-        Krill.Wallet.generate()
+        Krillcoin.Wallet.generate()
             .then(wlt => {
                 wallet = wlt;
                 return this.$.walletStore.put(wallet);
@@ -191,7 +191,7 @@ class AccountsUi extends Krill.Observable {
     }
 
     _userFriendlyAddressesToAddresses(userFriendlyAddresses) {
-        return userFriendlyAddresses.map(userFriendly => Krill.Address.fromUserFriendlyAddress(userFriendly));
+        return userFriendlyAddresses.map(userFriendly => Krillcoin.Address.fromUserFriendlyAddress(userFriendly));
     }
 
     _checkPendingContract(address) {

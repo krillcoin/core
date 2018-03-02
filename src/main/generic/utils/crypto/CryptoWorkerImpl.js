@@ -48,7 +48,7 @@ class CryptoWorkerImpl extends IWorker.Stub(CryptoWorker) {
             const wasmOut = Module.stackAlloc(CryptoWorker.BLAKE2_HASH_SIZE);
             const wasmIn = Module.stackAlloc(input.length);
             new Uint8Array(Module.HEAPU8.buffer, wasmIn, input.length).set(input);
-            const res = Module._krill_blake2(wasmOut, wasmIn, input.length);
+            const res = Module._krillcoin_blake2(wasmOut, wasmIn, input.length);
             if (res !== 0) {
                 throw res;
             }
@@ -74,7 +74,7 @@ class CryptoWorkerImpl extends IWorker.Stub(CryptoWorker) {
             const wasmOut = Module.stackAlloc(CryptoWorker.ARGON2_HASH_SIZE);
             const wasmIn = Module.stackAlloc(input.length);
             new Uint8Array(Module.HEAPU8.buffer, wasmIn, input.length).set(input);
-            const res = Module._krill_argon2(wasmOut, wasmIn, input.length, 512);
+            const res = Module._krillcoin_argon2(wasmOut, wasmIn, input.length, 512);
             if (res !== 0) {
                 throw res;
             }
@@ -104,7 +104,7 @@ class CryptoWorkerImpl extends IWorker.Stub(CryptoWorker) {
                 Module.stackRestore(stackTmp);
                 const wasmIn = Module.stackAlloc(input.length);
                 new Uint8Array(Module.HEAPU8.buffer, wasmIn, input.length).set(input);
-                const res = Module._krill_argon2(wasmOut, wasmIn, input.length, 512);
+                const res = Module._krillcoin_argon2(wasmOut, wasmIn, input.length, 512);
                 if (res !== 0) {
                     throw res;
                 }
@@ -132,7 +132,7 @@ class CryptoWorkerImpl extends IWorker.Stub(CryptoWorker) {
             const wasmOut = Module.stackAlloc(CryptoWorker.SHA256_HASH_SIZE);
             const wasmIn = Module.stackAlloc(input.length);
             new Uint8Array(Module.HEAPU8.buffer, wasmIn, input.length).set(input);
-            Module._krill_sha256(wasmOut, wasmIn, input.length);
+            Module._krillcoin_sha256(wasmOut, wasmIn, input.length);
             const hash = new Uint8Array(CryptoWorker.SHA256_HASH_SIZE);
             hash.set(new Uint8Array(Module.HEAPU8.buffer, wasmOut, CryptoWorker.SHA256_HASH_SIZE));
             return hash;
@@ -159,7 +159,7 @@ class CryptoWorkerImpl extends IWorker.Stub(CryptoWorker) {
             new Uint8Array(Module.HEAPU8.buffer, wasmIn, key.length).set(key);
             const wasmSalt = Module.stackAlloc(salt.length);
             new Uint8Array(Module.HEAPU8.buffer, wasmSalt, salt.length).set(salt);
-            const res = Module._krill_kdf(wasmOut, wasmIn, key.length, wasmSalt, salt.length, 512, iterations);
+            const res = Module._krillcoin_kdf(wasmOut, wasmIn, key.length, wasmSalt, salt.length, 512, iterations);
             if (res !== 0) {
                 throw res;
             }
@@ -501,21 +501,26 @@ class CryptoWorkerImpl extends IWorker.Stub(CryptoWorker) {
 
     /**
      * @param {Uint8Array} blockSerialized
+     * @param {Array.<boolean|undefined>} transactionValid
      * @param {number} timeNow
      * @param {Uint8Array} genesisHash
      * @returns {Promise.<{valid: boolean, pow: SerialBuffer, interlinkHash: SerialBuffer, bodyHash: SerialBuffer}>}
      */
-    async blockVerify(blockSerialized, timeNow, genesisHash) {
+    async blockVerify(blockSerialized, transactionValid, timeNow, genesisHash) {
         // XXX Create a stub genesis block within the worker.
         if (!Block.GENESIS) {
             Block.GENESIS = { HASH: Hash.unserialize(new SerialBuffer(genesisHash)) };
         }
 
         const block = Block.unserialize(new SerialBuffer(blockSerialized));
-        const valid = await block.computeVerify(timeNow);
+        for (let i = 0; i < transactionValid.length; i++) {
+            block.body.transactions[i]._valid = transactionValid[i];
+        }
+
+        const valid = await block._verify(timeNow);
         const pow = await block.header.pow();
-        const interlinkHash = await block.interlink.hash();
-        const bodyHash = await block.body.hash();
+        const interlinkHash = block.interlink.hash();
+        const bodyHash = block.body.hash();
         return { valid: valid, pow: pow.serialize(), interlinkHash: interlinkHash.serialize(), bodyHash: bodyHash.serialize() };
     }
 }

@@ -59,7 +59,7 @@ describe('NetUtils', () => {
     });
 
     it('accepts valid hostnames', () => {
-        expect(NetUtils.hostGloballyReachable('dev.krill-network.com')).toEqual(true);
+        expect(NetUtils.hostGloballyReachable('dev.krillcoin-network.com')).toEqual(true);
         expect(NetUtils.hostGloballyReachable('example.com')).toEqual(true);
     });
 });

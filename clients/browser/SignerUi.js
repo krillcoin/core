@@ -132,9 +132,9 @@ class SignerUi {
             }
 
             const TYPE_MAP = new Map();
-            TYPE_MAP.set(Krill.Account.Type.BASIC, SignerUi.SignerType.SINGLE_SIG);
-            TYPE_MAP.set(Krill.Account.Type.VESTING, SignerUi.SignerType.VESTING);
-            TYPE_MAP.set(Krill.Account.Type.HTLC, SignerUi.SignerType.HTLC);
+            TYPE_MAP.set(Krillcoin.Account.Type.BASIC, SignerUi.SignerType.SINGLE_SIG);
+            TYPE_MAP.set(Krillcoin.Account.Type.VESTING, SignerUi.SignerType.VESTING);
+            TYPE_MAP.set(Krillcoin.Account.Type.HTLC, SignerUi.SignerType.HTLC);
             return TYPE_MAP.get(account.type);
         });
     }

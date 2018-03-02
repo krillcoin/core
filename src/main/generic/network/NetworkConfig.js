@@ -190,7 +190,7 @@ class RtcNetworkConfig extends NetworkConfig {
         this._rtcConfig = {
             iceServers: [
                 {urls: 'stun:stun.l.google.com:19302'},
-                {urls: 'stun:stun.krill-network.com:19302'}
+                {urls: 'stun:stun.krillcoin-network.com:19302'}
             ]
         };
     }

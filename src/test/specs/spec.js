@@ -2,8 +2,8 @@ process.chdir('./dist');
 process.env.NODE_PATH = '.';
 require('module').Module._initPaths();
 
-const Krill = require(process.env.USE_ISTANBUL ? 'node-istanbul.js' : 'node.js');
-for (let i in Krill) global[i] = Krill[i];
+const Krillcoin = require(process.env.USE_ISTANBUL ? 'node-istanbul.js' : 'node.js');
+for (let i in Krillcoin) global[i] = Krillcoin[i];
 
 global.Class = {
     register: clazz => {
@@ -14,6 +14,9 @@ global.Class = {
 require('./generic/DummyData.spec.js');
 require('./generic/TestUtils.spec.js');
 require('./generic/consensus/TestBlockchain.spec.js');
+
+// Blob is not defined on Node.js
+Class.register(class Blob{});
 
 if (process.env.USE_ISTANBUL) {
     jasmine.getEnv().addReporter(/** @type {Reporter} */ {

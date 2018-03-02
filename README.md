@@ -1,8 +1,10 @@
-# KrillCoin Blockchain [ ![Codeship Status for krillcoin/core](https://app.codeship.com/projects/10d50050-fc36-0135-f11e-522d288f3c19/status?branch=master)](https://app.codeship.com/projects/279023)
+# Krillcoin Blockchain [![Build Status](https://travis-ci.org/krillcoin-network/core.svg)](https://travis-ci.org/krillcoin-network/core)
 
-**[KrillCoin](https://krillcoin.com/)** is a frictionless payment protocol for the web.
+**[Krillcoin](https://krillcoin.com/)** is a frictionless payment protocol for the web.
 
-To dive into the details of the protocol architecture check out the [Krill Developer Reference](https://krillcoin.com/developer-reference).
+For a high-level introduction check out the [Krillcoin White Paper](https://medium.com/krillcoin-network/krillcoin-a-peer-to-peer-payment-protocol-native-to-the-web-ffd324bb084).
+
+To dive into the details of the protocol architecture check out the [Krillcoin Developer Reference](https://krillcoin.com/developer-reference).
 
 ## Library Demo
 Check out our testnet [Browser Miner](https://krillcoin.com/miner) and [Wallet](https://krillcoin.com/wallet).
@@ -15,21 +17,21 @@ Check out our testnet [Browser Miner](https://krillcoin.com/miner) and [Wallet](
     - For MacOS or Windows, [check here for git](https://git-scm.com/downloads) and [here for compilation tools](https://github.com/nodejs/node-gyp#on-mac-os-x).
 3. If you want to use `yarn` to manage the dependencies, run: `sudo npm install -g yarn`.
 4. Install `gulp` globally: `sudo npm install -g gulp` or `yarn global add gulp`.
-5. Clone this repository: `git clone https://github.com/krill-network/core`.
+5. Clone this repository: `git clone https://github.com/krillcoin-network/core`.
 6. Enter the core directory: `cd core`.
 7. Run: `npm install` or `yarn`.
 8. Run: `npm run build` or `yarn build`.
 9. Open `clients/browser/index.html` in your browser.
 
 ## Web Developers
-### Most simple Web Application on top of the Krill Blockchain
-A good way to get started is to have a look at [the most simple web application on top of the Krill Blockchain](https://demo.krillcoin.com/).
+### Most simple Web Application on top of the Krillcoin Blockchain
+A good way to get started is to have a look at [the most simple web application on top of the Krillcoin Blockchain](https://demo.krillcoin.com/).
 
 ### Installation for Web Developers
 Follow the Quickstart guide or use our CDN:
 
 ```
-<script src="https://cdn.krillcoin.com/core/krill.js"></script>
+<script src="https://cdn.krillcoin.com/core/krillcoin.js"></script>
 ```
 
 
@@ -63,7 +65,7 @@ node index.js --host=HOSTNAME --port=PORT --cert=SSL_CERT_FILE --key=SSL_KEY_FIL
 | `--wallet-address=ADDRESS` | Initialize wallet using ADDRESS as a wallet address. |
 
 ### Build your own browser client
-Just include `<script src="dist/krill.js"></script>` in your project.
+Just include `<script src="dist/krillcoin.js"></script>` in your project.
 
 ### API
 Visit the [API Documentation](dist/API_DOCUMENTATION.md).
@@ -130,12 +132,12 @@ docker build \
   --build-arg KEY=<KEY> \
   --build-arg CRT=<CRT> \
   --build-arg PORT=<PORT> \
-  -t krill .
+  -t krillcoin .
 ```
 
 ### Running an instance of the image
 
-`docker run -d -p 8080:8080 -v /etc/letsencrypt/:/etc/letsencrypt/ --name "krill" krill`
+`docker run -d -p 8080:8080 -v /etc/letsencrypt/:/etc/letsencrypt/ --name "krillcoin" krillcoin`
 
 Note that you can override any of the arguments which were baked into the image at runtime with exception to the *BRANCH*. The -v flag here allows for mapping a local system path into the container for the purpose of using the existing *DOMAIN* certificates.
 
@@ -144,7 +146,7 @@ Note that you can override any of the arguments which were baked into the image 
 
 ## Contribute
 
-If you'd like to contribute to the development of Krill please follow our [Code of Conduct](/.github/CODE_OF_CONDUCT.md) and [Contributing Guidelines](/.github/CONTRIBUTING.md).
+If you'd like to contribute to the development of Krillcoin please follow our [Code of Conduct](/.github/CODE_OF_CONDUCT.md) and [Contributing Guidelines](/.github/CONTRIBUTING.md).
 
 ## License
 

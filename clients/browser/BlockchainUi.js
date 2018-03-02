@@ -66,7 +66,7 @@ class BlockchainUi {
 
     _updateAverageBlockTime() {
         const head = this.$.blockchain.head;
-        const tailHeight = Math.max(head.height - Krill.Policy.DIFFICULTY_BLOCK_WINDOW, 1);
+        const tailHeight = Math.max(head.height - Krillcoin.Policy.DIFFICULTY_BLOCK_WINDOW, 1);
 
         this.$.blockchain.getBlockAt(tailHeight).then(tailBlock => {
             let averageBlockTime;
@@ -101,7 +101,7 @@ class BlockchainUi {
         this.$blockTransactionsCount.textContent = !block.isLight()? block.transactionCount : '';
 
         block.pow().then(pow => {
-            const realDifficulty = Krill.BlockUtils.realDifficulty(pow);
+            const realDifficulty = Krillcoin.BlockUtils.realDifficulty(pow);
             this.$blockPowHash.textContent = pow.toBase64();
             this.$blockDifficulty.textContent = `${block.difficulty} (${realDifficulty})`;
         });

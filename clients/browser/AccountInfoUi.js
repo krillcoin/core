@@ -64,7 +64,7 @@ class AccountInfoUi {
         }
         let address;
         try {
-            address = Krill.Address.fromUserFriendlyAddress(userFriendlyAddress);
+            address = Krillcoin.Address.fromUserFriendlyAddress(userFriendlyAddress);
         } catch(e) {
             this.$addressInput.classList.add('error');
             return;
@@ -81,14 +81,14 @@ class AccountInfoUi {
         Utils.getAccount(this.$, this._address).then(account => {
             this.$balance.textContent = Utils.satoshisToCoins(account.balance);
             switch (account.type) {
-                case Krill.Account.Type.BASIC:
+                case Krillcoin.Account.Type.BASIC:
                     this.$el.setAttribute(AccountInfoUi.ATTRIBUTE_ACCOUNT_TYPE, AccountInfoUi.AccountType.BASIC);
                     break;
-                case Krill.Account.Type.VESTING:
+                case Krillcoin.Account.Type.VESTING:
                     this.$el.setAttribute(AccountInfoUi.ATTRIBUTE_ACCOUNT_TYPE, AccountInfoUi.AccountType.VESTING);
                     this._updateVestingDetails(account);
                     break;
-                case Krill.Account.Type.HTLC:
+                case Krillcoin.Account.Type.HTLC:
                     this.$el.setAttribute(AccountInfoUi.ATTRIBUTE_ACCOUNT_TYPE, AccountInfoUi.AccountType.HTLC);
                     this._updateHtlcDetails(account);
                     break;

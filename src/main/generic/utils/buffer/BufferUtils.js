@@ -127,7 +127,7 @@ class BufferUtils {
      * @param {string} [alphabet] Alphabet to use
      * @return {string}
      */
-    static toBase32(buf, alphabet = BufferUtils.BASE32_ALPHABET.KRILL) {
+    static toBase32(buf, alphabet = BufferUtils.BASE32_ALPHABET.KRILLCOIN) {
         let shift = 3, carry = 0, byte, symbol, i, res = '';
 
         for (i = 0; i < buf.length; i++) {
@@ -162,7 +162,7 @@ class BufferUtils {
      * @param {string} [alphabet] Alphabet to use
      * @return {Uint8Array}
      */
-    static fromBase32(base32, alphabet = BufferUtils.BASE32_ALPHABET.KRILL) {
+    static fromBase32(base32, alphabet = BufferUtils.BASE32_ALPHABET.KRILLCOIN) {
         const charmap = [];
         alphabet.toUpperCase().split('').forEach((c, i) => {
             if (!(c in charmap)) charmap[c] = i;
@@ -280,7 +280,7 @@ BufferUtils.BASE64_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvw
 BufferUtils.BASE32_ALPHABET = {
     RFC4648: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567=',
     RFC4648_HEX: '0123456789ABCDEFGHIJKLMNOPQRSTUV=',
-    KRILL: '0123456789ABCDEFGHJKLMNPQRSTUVXY'
+    KRILLCOIN: '0123456789ABCDEFGHJKLMNPQRSTUVXY'
 };
 BufferUtils.HEX_ALPHABET = '0123456789abcdef';
 BufferUtils._BASE64_LOOKUP = [];

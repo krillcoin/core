@@ -1,7 +1,7 @@
 class Policy {
     /**
-     * Convert Krill decimal to Number of Satoshis.
-     * @param {number} coins Krill count in decimal
+     * Convert Krillcoin decimal to Number of Satoshis.
+     * @param {number} coins Krillcoin count in decimal
      * @return {number} Number of Satoshis
      */
     static coinsToSatoshis(coins) {
@@ -9,9 +9,9 @@ class Policy {
     }
 
     /**
-     * Convert Number of Satoshis to Krill decimal.
+     * Convert Number of Satoshis to Krillcoin decimal.
      * @param {number} satoshis Number of Satoshis.
-     * @return {number} Krill count in decimal.
+     * @return {number} Krillcoin count in decimal.
      */
     static satoshisToCoins(satoshis) {
         return satoshis / Policy.SATOSHIS_PER_COIN;
@@ -138,7 +138,7 @@ Policy.TRANSACTION_VALIDITY_WINDOW = 120;
 /* Supply & Emission Parameters */
 
 /**
- * Number of Satoshis per Krill.
+ * Number of Satoshis per Krillcoin.
  * @type {number}
  * @constant
  */

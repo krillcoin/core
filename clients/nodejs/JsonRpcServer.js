@@ -1,12 +1,12 @@
 const http = require('http');
-const Krill = require('../../dist/node.js');
+const Krillcoin = require('../../dist/node.js');
 
 class JsonRpcServer {
     constructor(rpcPort = 8648) {
         http.createServer((req, res) => {
             if (req.method === 'GET') {
                 res.writeHead(200);
-                res.end('Krill JSON-RPC Server\n');
+                res.end('Krillcoin JSON-RPC Server\n');
             } else if (req.method === 'POST') {
                 this._onRequest(req, res);
             } else {
@@ -35,7 +35,7 @@ class JsonRpcServer {
 
         // Transactions
         this._methods.set('sendRawTransaction', async (txhex) => {
-            const tx = Krill.Transaction.unserialize(BufferUtils.fromHex(txhex));
+            const tx = Krillcoin.Transaction.unserialize(Krillcoin.BufferUtils.fromHex(txhex));
             const ret = await mempool.pushTransaction(tx);
             if (ret < 0) {
                 const e = new Error(`Transaction not accepted: ${ret}`);
@@ -45,24 +45,24 @@ class JsonRpcServer {
             return tx.hash().toHex();
         });
         this._methods.set('sendTransaction', async (tx) => {
-            const from = Krill.Address.fromString(tx.from);
-            const fromType = tx.fromType ? Number.parseInt(tx.fromType) : Krill.Account.Type.BASIC;
-            const to = Krill.Address.fromString(tx.to);
-            const toType = tx.toType ? Number.parseInt(tx.toType) : Krill.Account.Type.BASIC;
+            const from = Krillcoin.Address.fromString(tx.from);
+            const fromType = tx.fromType ? Number.parseInt(tx.fromType) : Krillcoin.Account.Type.BASIC;
+            const to = Krillcoin.Address.fromString(tx.to);
+            const toType = tx.toType ? Number.parseInt(tx.toType) : Krillcoin.Account.Type.BASIC;
             const value = parseInt(tx.value);
             const fee = parseInt(tx.fee);
-            const data = tx.data ? Krill.BufferUtils.fromHex(tx.data) : null;
+            const data = tx.data ? Krillcoin.BufferUtils.fromHex(tx.data) : null;
             /** @type {Wallet} */
             const wallet = await walletStore.get(from);
-            if (!wallet || !(wallet instanceof Krill.Wallet)) {
+            if (!wallet || !(wallet instanceof Krillcoin.Wallet)) {
                 throw new Error(`"${tx.from}" can not sign transactions using this node.`);
             }
             let transaction;
-            if (fromType !== Krill.Account.Type.BASIC) {
+            if (fromType !== Krillcoin.Account.Type.BASIC) {
                 throw new Error('Only basic transactions may be sent using "sendTransaction".');
-            } else if (toType !== Krill.Account.Type.BASIC || data !== null) {
-                transaction = new Krill.ExtendedTransaction(from, fromType, to, toType, value, fee, blockchain.height, Krill.Transaction.Flag.NONE, data);
-                transaction.proof = Krill.SignatureProof.singleSig(wallet.publicKey, Krill.Signature.create(wallet.keyPair.privateKey, wallet.publicKey, transaction.serializeContent())).serialize();
+            } else if (toType !== Krillcoin.Account.Type.BASIC || data !== null) {
+                transaction = new Krillcoin.ExtendedTransaction(from, fromType, to, toType, value, fee, blockchain.height, Krillcoin.Transaction.Flag.NONE, data);
+                transaction.proof = Krillcoin.SignatureProof.singleSig(wallet.publicKey, Krillcoin.Signature.create(wallet.keyPair.privateKey, wallet.publicKey, transaction.serializeContent())).serialize();
             } else {
                 transaction = wallet.createTransaction(to, value, fee, blockchain.height);
             }
@@ -75,7 +75,7 @@ class JsonRpcServer {
             return transaction.hash().toHex();
         });
         this._methods.set('getTransactionByBlockHashAndIndex', async (blockHash, txIndex) => {
-            const block = await blockchain.getBlock(Krill.Hash.fromString(blockHash));
+            const block = await blockchain.getBlock(Krillcoin.Hash.fromString(blockHash));
             if (block && block.transactions.length > txIndex) {
                 return JsonRpcServer._transactionToObj(block.transactions[txIndex], block, txIndex);
             }
@@ -89,19 +89,19 @@ class JsonRpcServer {
             return null;
         });
         this._methods.set('getTransactionByHash', async (hash) => {
-            const entry = await blockchain.getTransactionInfoByHash(Krill.Hash.fromString(hash));
+            const entry = await blockchain.getTransactionInfoByHash(Krillcoin.Hash.fromString(hash));
             if (entry) {
                 const block = await blockchain.getBlock(entry.blockHash);
                 return JsonRpcServer._transactionToObj(block.transactions[entry.index], block, entry.index);
             }
-            const mempoolTx = mempool.getTransaction(Krill.Hash.fromString(hash));
+            const mempoolTx = mempool.getTransaction(Krillcoin.Hash.fromString(hash));
             if (mempoolTx) {
                 return JsonRpcServer._transactionToObj(mempoolTx);
             }
             return null;
         });
         this._methods.set('getTransactionReceipt', async (hash) => {
-            const entry = await blockchain.getTransactionInfoByHash(Krill.Hash.fromString(hash));
+            const entry = await blockchain.getTransactionInfoByHash(Krillcoin.Hash.fromString(hash));
             if (!entry) return null;
             const block = await blockchain.getBlock(entry.blockHash);
             return {
@@ -131,13 +131,13 @@ class JsonRpcServer {
             return (await walletStore.list()).map(JsonRpcServer._addressToObj);
         });
         this._methods.set('createAccount', async () => {
-            const wallet = await Krill.Wallet.generate();
+            const wallet = await Krillcoin.Wallet.generate();
             await walletStore.put(wallet);
             return JsonRpcServer._walletToObj(wallet);
         });
         this._methods.set('getBalance', async (addrString, atBlock) => {
             if (atBlock && atBlock !== 'latest') throw new Error(`Cannot calculate balance at block ${atBlock}`);
-            return (await accounts.get(Krill.Address.fromString(addrString))).balance;
+            return (await accounts.get(Krillcoin.Address.fromString(addrString))).balance;
         });
 
         // Blockchain
@@ -145,7 +145,7 @@ class JsonRpcServer {
             return blockchain.height;
         });
         this._methods.set('getBlockTransactionCountByHash', async (blockHash) => {
-            const block = await blockchain.getBlock(Krill.Hash.fromString(blockHash));
+            const block = await blockchain.getBlock(Krillcoin.Hash.fromString(blockHash));
             return block ? block.transactionCount : null;
         });
         this._methods.set('getBlockTransactionCountByNumber', async (number) => {
@@ -153,7 +153,7 @@ class JsonRpcServer {
             return block ? block.transactionCount : null;
         });
         this._methods.set('getBlockByHash', async (blockHash, includeTransactions) => {
-            const block = await blockchain.getBlock(Krill.Hash.fromString(blockHash));
+            const block = await blockchain.getBlock(Krillcoin.Hash.fromString(blockHash));
             return block ? JsonRpcServer._blockToObj(block, includeTransactions) : null;
         });
         this._methods.set('getBlockByNumber', async (number, includeTransactions) => {
@@ -179,7 +179,7 @@ class JsonRpcServer {
             miner: block.minerAddr.toHex(),
             minerString: block.minerAddr.toUserFriendlyAddress(),
             difficulty: block.difficulty,
-            extraData: Krill.BufferUtils.toHex(block.body.extraData),
+            extraData: Krillcoin.BufferUtils.toHex(block.body.extraData),
             size: block.serializedSize,
             timestamp: block.timestamp,
             transactions: includeTransactions
@@ -206,7 +206,7 @@ class JsonRpcServer {
             toString: tx.recipient.toUserFriendlyAddress(),
             value: tx.value,
             fee: tx.fee,
-            data: Krill.BufferUtils.toHex(tx.data) || null
+            data: Krillcoin.BufferUtils.toHex(tx.data) || null
         };
     }
 

@@ -40,7 +40,7 @@ class SingleSigSigner extends Signer {
     }
 
     get type() {
-        return Krill.Account.Type.BASIC;
+        return Krillcoin.Account.Type.BASIC;
     }
 
     get publicKey() {
@@ -49,8 +49,8 @@ class SingleSigSigner extends Signer {
 
     sign(tx) {
         const keyPair = this._wallet.keyPair;
-        const signature = Krill.Signature.create(keyPair.privateKey, keyPair.publicKey, tx.serializeContent());
-        const proof = Krill.SignatureProof.singleSig(keyPair.publicKey, signature).serialize();
+        const signature = Krillcoin.Signature.create(keyPair.privateKey, keyPair.publicKey, tx.serializeContent());
+        const proof = Krillcoin.SignatureProof.singleSig(keyPair.publicKey, signature).serialize();
         return {
             signature: signature,
             proof: proof
@@ -75,15 +75,15 @@ class MultiSigSigner extends Signer {
                 // public keys of all the m out of n combinations of all n public keys where m = signingAddresses.length
                 _this._combinationsPublicKeys = storedMultiSigWallet.publicKeys;
                 _this._signingPublicKeys = signingKeyPairs.map(keyPair => keyPair.publicKey);
-                _this._aggregatedSigningPublicKey = Krill.PublicKey.sum(_this._signingPublicKeys);
+                _this._aggregatedSigningPublicKey = Krillcoin.PublicKey.sum(_this._signingPublicKeys);
                 _this._signingWallets = signingKeyPairs.map(keyPair =>
-                    new Krill.MultiSigWallet(keyPair, signingAddresses.length, _this._combinationsPublicKeys));
+                    new Krillcoin.MultiSigWallet(keyPair, signingAddresses.length, _this._combinationsPublicKeys));
                 return _this;
             });
     }
 
     get type() {
-        return Krill.Account.Type.BASIC;
+        return Krillcoin.Account.Type.BASIC;
     }
 
     get publicKey() {
@@ -94,11 +94,11 @@ class MultiSigSigner extends Signer {
 
     sign(tx) {
         const commitmentPairs = this._signingWallets.map(wallet => wallet.createCommitment());
-        const aggregatedCommitment = Krill.Commitment.sum(commitmentPairs.map(pair => pair.commitment));
+        const aggregatedCommitment = Krillcoin.Commitment.sum(commitmentPairs.map(pair => pair.commitment));
         const partialSignatures = this._signingWallets.map((wallet, index) =>
             wallet.signTransaction(tx, this._signingPublicKeys, aggregatedCommitment, commitmentPairs[index].secret));
-        const signature = Krill.Signature.fromPartialSignatures(aggregatedCommitment, partialSignatures);
-        const proof = Krill.SignatureProof.multiSig(this._aggregatedSigningPublicKey, this._combinationsPublicKeys,
+        const signature = Krillcoin.Signature.fromPartialSignatures(aggregatedCommitment, partialSignatures);
+        const proof = Krillcoin.SignatureProof.multiSig(this._aggregatedSigningPublicKey, this._combinationsPublicKeys,
             signature).serialize();
         return {
             signature: signature,
@@ -126,7 +126,7 @@ class VestingSigner extends Signer {
     }
 
     get type() {
-        return Krill.Account.Type.VESTING;
+        return Krillcoin.Account.Type.VESTING;
     }
 
     sign(tx) {
@@ -136,8 +136,8 @@ class VestingSigner extends Signer {
 
 class HtlcSigner extends Signer {
     /** @async */
-    constructor($, address, proofType = Krill.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER,
-                proofHashAlgorithm = Krill.Hash.Algorithm.BLAKE2B, proofHashPreImage = '',
+    constructor($, address, proofType = Krillcoin.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER,
+                proofHashAlgorithm = Krillcoin.Hash.Algorithm.BLAKE2B, proofHashPreImage = '',
                 proofHashDepth = 0, proofHashCount = 0, htlcSenderSigner = null, htlcRecipientSigner = null) {
         let _this;
         return super($, address).then(instance => {
@@ -155,19 +155,19 @@ class HtlcSigner extends Signer {
     }
 
     get type() {
-        return Krill.Account.Type.HTLC;
+        return Krillcoin.Account.Type.HTLC;
     }
 
     sign(tx) {
         const signatureProofs = this._signers.map(signer => signer.sign(tx).proof);
 
         const proofSize = this._calculateTotalProofSize(this._proofType, this._proofHashAlgorithm, signatureProofs);
-        const proof = new Krill.SerialBuffer(proofSize);
+        const proof = new Krillcoin.SerialBuffer(proofSize);
 
         proof.writeUint8(this._proofType);
 
-        if (this._proofType === Krill.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER) {
-            let hash = Krill.BufferUtils.fromAscii(this._proofHashPreImage); // ascii preimage
+        if (this._proofType === Krillcoin.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER) {
+            let hash = Krillcoin.BufferUtils.fromAscii(this._proofHashPreImage); // ascii preimage
             hash = Utils.hash(hash, this._proofHashAlgorithm); // hash once to make sure we use a hash as preimage
             for (let i = 0; i < this._proofHashCount - this._proofHashDepth; ++i) {
                 hash = Utils.hash(hash, this._proofHashAlgorithm);
@@ -192,13 +192,13 @@ class HtlcSigner extends Signer {
     /** @async */
     _getSigners(htlcSenderSigner = null, htlcRecipientSigner = null) {
         const signerPromises = [];
-        if (this._proofType === Krill.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER
-            || this._proofType === Krill.HashedTimeLockedContract.ProofType.EARLY_RESOLVE) {
+        if (this._proofType === Krillcoin.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER
+            || this._proofType === Krillcoin.HashedTimeLockedContract.ProofType.EARLY_RESOLVE) {
             signerPromises.push(htlcRecipientSigner? Promise.resolve(htlcRecipientSigner)
                 : new SingleSigSigner(this.$, this._account.recipient));
         }
-        if (this._proofType === Krill.HashedTimeLockedContract.ProofType.EARLY_RESOLVE
-            || this._proofType === Krill.HashedTimeLockedContract.ProofType.TIMEOUT_RESOLVE) {
+        if (this._proofType === Krillcoin.HashedTimeLockedContract.ProofType.EARLY_RESOLVE
+            || this._proofType === Krillcoin.HashedTimeLockedContract.ProofType.TIMEOUT_RESOLVE) {
             signerPromises.push(htlcSenderSigner? Promise.resolve(htlcSenderSigner)
                 : new SingleSigSigner(this.$, this._account.sender));
         }
@@ -206,18 +206,18 @@ class HtlcSigner extends Signer {
     }
 
     _calculateTotalProofSize(proofType, hashAlgorithm, signatureProofs) {
-        const expectedProofCount = proofType === Krill.HashedTimeLockedContract.ProofType.EARLY_RESOLVE? 2 : 1;
+        const expectedProofCount = proofType === Krillcoin.HashedTimeLockedContract.ProofType.EARLY_RESOLVE? 2 : 1;
         if (signatureProofs.length !== expectedProofCount) throw Error('Unexpected number of proofs.');
 
         const signatureProofsSize = signatureProofs.reduce(
             (size, signatureProof) => size + signatureProof.byteLength, 0);
 
-        if (proofType === Krill.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER) {
+        if (proofType === Krillcoin.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER) {
             return /* proof type */ 1
                 + /* algorithm */ 1
                 + /* hash depth */ 1
-                + /* hash root */ Krill.Hash.getSize(hashAlgorithm)
-                + /* hashed pre image */ Krill.Hash.getSize(hashAlgorithm)
+                + /* hash root */ Krillcoin.Hash.getSize(hashAlgorithm)
+                + /* hashed pre image */ Krillcoin.Hash.getSize(hashAlgorithm)
                 + /* signature proof */ signatureProofsSize;
         } else {
             return /* proof type */ 1 + signatureProofsSize;

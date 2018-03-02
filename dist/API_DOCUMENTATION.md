@@ -1,40 +1,40 @@
-# Krill Core API documentation
-**This documentation describes the API of the [Betanet](https://github.com/krill-network/core/tree/betanet) branch.**
+# Krillcoin Core API documentation
+**This documentation describes the API of the [Betanet](https://github.com/krillcoin-network/core/tree/betanet) branch.**
 
-All Krill Core classes reside in the `Krill.` namespace.
+All Krillcoin Core classes reside in the `Krillcoin.` namespace.
 
-## Krill
+## Krillcoin
 
 ### Basic initialization
 
 ```js
-Krill.init($ => {
-    // $ is the Krill.Core instance
+Krillcoin.init($ => {
+    // $ is the Krillcoin.Core instance
 });
 ```
 
 ### Initialization with error callback
-- `Krill.ERR_WAIT`: An instance of Krill Core is already running in another window of the same origin. When all other windows are closed, the success callback will be invoked.
-- `Krill.ERR_UNSUPPORTED`: This browser is not supported.
-- `Krill.ERR_UNKNOWN`: An unknown error occured while loading.
-- `Krill.Wallet.ERR_INVALID_WALLET_SEED` : An invalid wallet seed has been provided.
+- `Krillcoin.ERR_WAIT`: An instance of Krillcoin Core is already running in another window of the same origin. When all other windows are closed, the success callback will be invoked.
+- `Krillcoin.ERR_UNSUPPORTED`: This browser is not supported.
+- `Krillcoin.ERR_UNKNOWN`: An unknown error occured while loading.
+- `Krillcoin.Wallet.ERR_INVALID_WALLET_SEED` : An invalid wallet seed has been provided.
 
 ```js
-Krill.init($ => {
-    // $ is the Krill.Core instance
+Krillcoin.init($ => {
+    // $ is the Krillcoin.Core instance
 }, code => {
     switch (code) {
-        case Krill.ERR_WAIT:
-            alert('Another Krill instance is already running');
+        case Krillcoin.ERR_WAIT:
+            alert('Another Krillcoin instance is already running');
             break;
-        case Krill.ERR_UNSUPPORTED:
+        case Krillcoin.ERR_UNSUPPORTED:
             alert('Browser not supported');
             break;
-        case Krill.Wallet.ERR_INVALID_WALLET_SEED:
+        case Krillcoin.Wallet.ERR_INVALID_WALLET_SEED:
             alert("Invalid wallet seed");
             break;
         default:
-            alert('Krill initialization error');
+            alert('Krillcoin initialization error');
             break;
     }
 });
@@ -45,15 +45,15 @@ You can pass some options to initialization.
 
 | Option        | Description           |
 | ------------- |:-------------:|
-| **_walletSeed_** | Wallet seed (See [Krill.Wallet](#wallet)) |
+| **_walletSeed_** | Wallet seed (See [Krillcoin.Wallet](#wallet)) |
 
 ```js
 const options = {
   walletSeed: "d6a651dcc13dab2e9d05d..."
 }
 
-Krill.init($ => {
-    // $ is the Krill.Core instance
+Krillcoin.init($ => {
+    // $ is the Krillcoin.Core instance
 }, code => {
   // Handle errors
 },
@@ -63,21 +63,21 @@ Krill.init($ => {
 
 ### Get an existing instance
 ```js
-Krill.get().then($ => {
-    // $ is the Krill.Core instance
+Krillcoin.get().then($ => {
+    // $ is the Krillcoin.Core instance
 });
 ```
 
-## Krill.Core
+## Krillcoin.Core
 
 ### Properties
-- `network`: [Krill.Network](#network)
-- `consensus`: [Krill.Consensus](#consensus)
-- `accounts`: [Krill.Accounts](#accounts)
-- `blockchain`: [Krill.Blockchain](#blockchain)
-- `mempool`: [Krill.Mempool](#mempool)
-- `wallet`: [Krill.Wallet](#wallet)
-- `miner`: [Krill.Miner](#miner)
+- `network`: [Krillcoin.Network](#network)
+- `consensus`: [Krillcoin.Consensus](#consensus)
+- `accounts`: [Krillcoin.Accounts](#accounts)
+- `blockchain`: [Krillcoin.Blockchain](#blockchain)
+- `mempool`: [Krillcoin.Mempool](#mempool)
+- `wallet`: [Krillcoin.Wallet](#wallet)
+- `miner`: [Krillcoin.Miner](#miner)
 
 ### Methods
 No public methods.
@@ -87,7 +87,7 @@ No events.
 
 
 <a name="network"></a>
-## Krill.Network
+## Krillcoin.Network
 The network will not connect automatically, call `$.network.connect()` to do so.
 
 ### Properties
@@ -121,7 +121,7 @@ $.network.on('peer-left', peer => console.log(`Peer ${peer} left`));
 
 
 <a name="consensus"></a>
-## Krill.Consensus
+## Krillcoin.Consensus
 
 ### Properties
 - `established`
@@ -142,7 +142,7 @@ $.consensus.on('established', () => console.log('consensus established!'))
 
 
 <a name="accounts"></a>
-## Krill.Accounts
+## Krillcoin.Accounts
 
 ### Properties
 No public properties.
@@ -173,7 +173,7 @@ $.accounts.on('a09rjiARiVYh2zJS0/1pYKZg4/A=').then(balance => {
 
 
 <a name="blockchain"></a>
-## Krill.Blockchain
+## Krillcoin.Blockchain
 
 ### Properties
 - `head`
@@ -209,7 +209,7 @@ $.blockchain.on('head-changed', () => {
 
 
 <a name="mempool"></a>
-## Krill.Mempool
+## Krillcoin.Mempool
 
 ### Properties
 No public properties.
@@ -225,7 +225,7 @@ No public properties.
 
 
 <a name="wallet"></a>
-## Krill.Wallet
+## Krillcoin.Wallet
 
 ### Properties
 - `address`
@@ -253,7 +253,7 @@ var restoredWallet = await Wallet.load(walletSeed);
 ```
 
 <a name="miner"></a>
-## Krill.Miner
+## Krillcoin.Miner
 Mining should not start before consensus is established and stop when consensus is lost. The Miner does not explicitely enforce this, but callers should ensure this behavior.
 
 ```js

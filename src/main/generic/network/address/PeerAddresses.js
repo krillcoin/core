@@ -792,7 +792,15 @@ PeerAddresses.DEFAULT_BAN_TIME = 1000 * 60 * 10; // 10 minutes
 PeerAddresses.INITIAL_FAILED_BACKOFF = 1000 * 15; // 15 seconds
 PeerAddresses.MAX_FAILED_BACKOFF = 1000 * 60 * 10; // 10 minutes
 PeerAddresses.SEED_PEERS = [
-    WsPeerAddress.seed('krillcoin-network.com', 8080, '0013496a500503221f04e6ea6f833d4faa593d95f5c673b8e7a27a5e860ebadc')
+    // WsPeerAddress.seed('alpacash.com', 8080),
+    // WsPeerAddress.seed('krillcoin1.styp-rekowsky.de', 8080),
+    // WsPeerAddress.seed('krillcoin2.styp-rekowsky.de', 8080),
+    // WsPeerAddress.seed('seed1.krillcoin-network.com', 8080),
+    // WsPeerAddress.seed('seed2.krillcoin-network.com', 8080),
+    // WsPeerAddress.seed('seed3.krillcoin-network.com', 8080),
+    // WsPeerAddress.seed('seed4.krillcoin-network.com', 8080),
+    // WsPeerAddress.seed('emily.krillcoin-network.com', 443)
+    WsPeerAddress.seed('krillcoin-network.com', 8080, 'e65e39616662f2c16d62dc08915e5a1d104619db8c2b9cf9b389f96c8dce9837')
 ];
 Class.register(PeerAddresses);
 

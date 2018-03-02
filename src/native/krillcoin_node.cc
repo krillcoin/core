@@ -1,6 +1,6 @@
 #include <nan.h>
 extern "C" {
-#include "krill_native.h"
+#include "krillcoin_native.h"
 }
 
 using v8::Function;
@@ -29,7 +29,7 @@ class MinerWorker : public AsyncWorker {
         ~MinerWorker() {}
 
         void Execute() {
-            result_nonce = krill_argon2_target(out, in, inlen, compact, min_nonce, max_nonce, m_cost);
+            result_nonce = krillcoin_argon2_target(out, in, inlen, compact, min_nonce, max_nonce, m_cost);
         }
 
         void HandleOKCallback() {
@@ -49,7 +49,7 @@ class MinerWorker : public AsyncWorker {
         uint32_t result_nonce;
 };
 
-NAN_METHOD(krill_argon2_target_async) {
+NAN_METHOD(krillcoin_argon2_target_async) {
     Callback* callback = new Callback(info[0].As<Function>());
 
     Local<Uint8Array> in_array = info[1].As<Uint8Array>();
@@ -65,8 +65,8 @@ NAN_METHOD(krill_argon2_target_async) {
 }
 
 NAN_MODULE_INIT(Init) {
-  Set(target, New<String>("krill_argon2_target_async").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(krill_argon2_target_async)).ToLocalChecked());
+  Set(target, New<String>("krillcoin_argon2_target_async").ToLocalChecked(),
+    GetFunction(New<FunctionTemplate>(krillcoin_argon2_target_async)).ToLocalChecked());
 }
 
-NODE_MODULE(krill_node, Init)
+NODE_MODULE(krillcoin_node, Init)

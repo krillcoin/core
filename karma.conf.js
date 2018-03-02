@@ -75,7 +75,7 @@ module.exports = function (config) {
         },
 
         sauceLabs: {
-            testName: 'Krill Core Tests',
+            testName: 'Krillcoin Core Tests',
             startConnect: false,
             tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
             build: process.env.TRAVIS_BUILD_NUMBER,

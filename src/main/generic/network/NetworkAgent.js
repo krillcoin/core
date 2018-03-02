@@ -244,8 +244,6 @@ class NetworkAgent extends Observable {
         // TODO We should validate that the given peerAddress actually resolves
         // to the peer's netAddress!
         if (this._channel.peerAddress) {
-            console.log('channel peerAddress', this._channel.peerAddress)
-            console.log('msg.peerAddress ', msg.peerAddress)
             if (!this._channel.peerAddress.equals(msg.peerAddress)) {
                 this._channel.ban('unexpected peerAddress in version message');
                 return;

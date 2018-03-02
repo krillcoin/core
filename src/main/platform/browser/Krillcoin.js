@@ -1,12 +1,12 @@
 /**
- * Entry class and dynamic loader for the Krill library in Browsers.
+ * Entry class and dynamic loader for the Krillcoin library in Browsers.
  *
- * When using NodeJS, you don't need this class. Just require the `krill` library.
+ * When using NodeJS, you don't need this class. Just require the `krillcoin` library.
  *
  * @example <caption>Browser usage</caption>
- * <script type="text/javascript" src="https://cdn.krillcoin.com/core/krill.js></script>
+ * <script type="text/javascript" src="https://cdn.krillcoin.com/core/krillcoin.js></script>
  * <script type="text/javascript">
- *     Krill.init(function(core) {
+ *     Krillcoin.init(function(core) {
  *         console.log(core.wallet.address);
  *     }, function(errorCode) {
  *         console.log("Error initializing core.");
@@ -14,69 +14,69 @@
  * </script>
  *
  * @example <caption>Browser usage (experimental)</caption>
- * <script type="text/javascript" src="https://cdn.krillcoin.com/core/krill.js></script>
+ * <script type="text/javascript" src="https://cdn.krillcoin.com/core/krillcoin.js></script>
  * <script type="text/javascript">
  *     async function init() {
- *         await Krill.load();
- *         const core = await new Krill.Core(options);
+ *         await Krillcoin.load();
+ *         const core = await new Krillcoin.Core(options);
  *         console.log(core.wallet.address);
  *     }
  *     init();
  * </script>
  *
  * @example <caption>NodeJS usage</caption>
- * const Krill = require('krill');
- * const core = await new Krill.Core(options);
+ * const Krillcoin = require('krillcoin');
+ * const core = await new Krillcoin.Core(options);
  * console.log(core.wallet.address);
  *
  * @namespace
  */
-class Krill {
+class Krillcoin {
     /**
-     * Load the Krill library.
+     * Load the Krillcoin library.
      * @param {?string} [path] Path that contains the required files to load the library.
      * @returns {Promise} Promise that resolves once the library was loaded.
      */
     static load(path) {
-        if (!Krill._hasNativePromise()) return Krill._unsupportedPromise();
-        if (Krill._loaded) return Promise.resolve();
-        Krill._loadPromise = Krill._loadPromise ||
+        if (!Krillcoin._hasNativePromise()) return Krillcoin._unsupportedPromise();
+        if (Krillcoin._loaded) return Promise.resolve();
+        Krillcoin._loadPromise = Krillcoin._loadPromise ||
             new Promise((resolve, error) => {
-                if (!Krill._script) {
-                    if (!Krill._hasNativeClassSupport() || !Krill._hasProperScoping()) {
+                if (!Krillcoin._script) {
+                    if (!Krillcoin._hasNativeClassSupport() || !Krillcoin._hasProperScoping()) {
                         console.error('Unsupported browser');
-                        error(Krill.ERR_UNSUPPORTED);
+                        error(Krillcoin.ERR_UNSUPPORTED);
                         return;
-                    } else if (!Krill._hasAsyncAwaitSupport()) {
-                        Krill.script = 'web-babel.js';
+                    } else if (!Krillcoin._hasAsyncAwaitSupport()) {
+                        Krillcoin.script = 'web-babel.js';
                         console.warn('Client lacks native support for async');
                     } else {
-                        Krill._script = 'web.js';
+                        Krillcoin._script = 'web.js';
                     }
                 }
 
                 if (!path) {
-                    if (Krill._currentScript && Krill._currentScript.src.indexOf('/') !== -1) {
-                        path = Krill._currentScript.src.substring(0, Krill._currentScript.src.lastIndexOf('/') + 1);
+                    if (Krillcoin._currentScript && Krillcoin._currentScript.src.indexOf('/') !== -1) {
+                        path = Krillcoin._currentScript.src.substring(0, Krillcoin._currentScript.src.lastIndexOf('/') + 1);
                     } else {
                         // Fallback
                         path = './';
                     }
                 }
                 
-                Krill._path = path;
-                Krill._fullScript = Krill._path + Krill._script;
+                Krillcoin._path = path;
+                Krillcoin._fullScript = Krillcoin._path + Krillcoin._script;
 
-                Krill._onload = () => {
-                    if (!Krill._loaded) {
-                        error(Krill.ERR_UNKNOWN);
+                Krillcoin._onload = () => {
+                    if (!Krillcoin._loaded) {
+                        error(Krillcoin.ERR_UNKNOWN);
                     } else {
                         resolve();
                     }
                 };
-                Krill._loadScript(Krill._fullScript, Krill._onload);
+                Krillcoin._loadScript(Krillcoin._fullScript, Krillcoin._onload);
             });
-        return Krill._loadPromise;
+        return Krillcoin._loadPromise;
     }
 
     static _loadScript(url, resolve) {
@@ -98,14 +98,14 @@ class Krill {
     }
 
     /**
-     * Load classes into scope (so you don't need to prefix them with `Krill.`).
+     * Load classes into scope (so you don't need to prefix them with `Krillcoin.`).
      * @param {Array.<string>} classes Array of class names to load in global scope
      * @returns {Promise.<void>}
      */
     static async loadToScope(...classes) {
-        await Krill.load();
+        await Krillcoin.load();
         for (const clazz of classes) {
-            self[clazz] = Krill[clazz];
+            self[clazz] = Krillcoin[clazz];
         }
     } 
 
@@ -143,7 +143,7 @@ class Krill {
     static _unsupportedPromise() {
         return {
             'catch': function (handler) {
-                handler(Krill.ERR_UNSUPPORTED);
+                handler(Krillcoin.ERR_UNSUPPORTED);
                 return this;
             },
             'then': function () {
@@ -157,47 +157,47 @@ class Krill {
     }
 
     /**
-     * Initialize the Krill client library.
+     * Initialize the Krillcoin client library.
      * @param {function()} ready Function to be called once the library is available.
      * @param {function(errorCode: number)} error Function to be called when the initialization fails.
      */
     static init(ready, error) {
-        if (!Krill._hasNativePromise() || !Krill._hasNativeGoodies()) {
-            if (error) error(Krill.ERR_UNSUPPORTED);
+        if (!Krillcoin._hasNativePromise() || !Krillcoin._hasNativeGoodies()) {
+            if (error) error(Krillcoin.ERR_UNSUPPORTED);
             return;
         }
 
         // Wait until there is only a single browser window open for this origin.
         WindowDetector.get().waitForSingleWindow(async function () {
             try {
-                await Krill.load();
-                await Krill.Crypto.prepareSyncCryptoWorker();
-                console.log('Krill engine loaded.');
+                await Krillcoin.load();
+                await Krillcoin.Crypto.prepareSyncCryptoWorker();
+                console.log('Krillcoin engine loaded.');
                 if (ready) ready();
             } catch (e) {
                 if (Number.isInteger(e)) {
                     if (error) error(e);
                 } else {
                     console.error('Error while initializing the core', e);
-                    if (error) error(Krill.ERR_UNKNOWN);
+                    if (error) error(Krillcoin.ERR_UNKNOWN);
                 }
             }
-        }, () => error && error(Krill.ERR_WAIT));
+        }, () => error && error(Krillcoin.ERR_WAIT));
     }
 }
-Krill._currentScript = document.currentScript;
-if (!Krill._currentScript) {
+Krillcoin._currentScript = document.currentScript;
+if (!Krillcoin._currentScript) {
     // Heuristic
     const scripts = document.getElementsByTagName('script');
-    Krill._currentScript = scripts[scripts.length - 1];
+    Krillcoin._currentScript = scripts[scripts.length - 1];
 }
 
-Krill.ERR_WAIT = -1;
-Krill.ERR_UNSUPPORTED = -2;
-Krill.ERR_UNKNOWN = -3;
-Krill._script = null;
-Krill._path = null;
-Krill._fullScript = null;
-Krill._onload = null;
-Krill._loaded = false;
-Krill._loadPromise = null;
+Krillcoin.ERR_WAIT = -1;
+Krillcoin.ERR_UNSUPPORTED = -2;
+Krillcoin.ERR_UNKNOWN = -3;
+Krillcoin._script = null;
+Krillcoin._path = null;
+Krillcoin._fullScript = null;
+Krillcoin._onload = null;
+Krillcoin._loaded = false;
+Krillcoin._loadPromise = null;

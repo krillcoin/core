@@ -25,7 +25,7 @@ class MinerWorkerPool extends IWorker.Pool(MinerWorker) {
         this._superUpdateToSize = super._updateToSize;
 
         if (PlatformUtils.isNodeJs()) {
-            const krill_node = require(`${__dirname}/krill_node`);
+            const krillcoin_node = require(`${__dirname}/krillcoin_node`);
             /**
              * @param {SerialBuffer} blockHeader
              * @param {number} compact
@@ -35,7 +35,7 @@ class MinerWorkerPool extends IWorker.Pool(MinerWorker) {
              */
             this.multiMine = function (blockHeader, compact, minNonce, maxNonce) {
                 return new Promise((resolve, fail) => {
-                    krill_node.krill_argon2_target_async(async (nonce) => {
+                    krillcoin_node.krillcoin_argon2_target_async(async (nonce) => {
                         try {
                             if (nonce === maxNonce) {
                                 resolve(false);

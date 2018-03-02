@@ -1,4 +1,4 @@
-class AccountSelector extends Krill.Observable {
+class AccountSelector extends Krillcoin.Observable {
     constructor(el, $) {
         super();
         if (el.nodeName.toLowerCase() !== 'select') {
@@ -15,7 +15,7 @@ class AccountSelector extends Krill.Observable {
 
     get selectedAddress() {
         try {
-            return Krill.Address.fromUserFriendlyAddress(this.$el.value);
+            return Krillcoin.Address.fromUserFriendlyAddress(this.$el.value);
         } catch(e) {
             return null;
         }
@@ -107,7 +107,7 @@ class AccountSelector extends Krill.Observable {
     }
 
     _getAddressesFromLocalStorage(key) {
-        return new LocalStorageList(key).get().map(userFriendly => Krill.Address.fromUserFriendlyAddress(userFriendly));
+        return new LocalStorageList(key).get().map(userFriendly => Krillcoin.Address.fromUserFriendlyAddress(userFriendly));
     }
 
     _selectDefaultWallet() {

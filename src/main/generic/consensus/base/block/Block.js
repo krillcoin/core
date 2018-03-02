@@ -82,9 +82,10 @@ class Block {
         if (this._valid === undefined) {
             if (this.isLight() || this.body.transactions.length < 150 || !IWorker.areWorkersAsync) {
                 // worker overhead doesn't pay off for small transaction numbers
-                this._valid = await this.computeVerify(time.now());
+                this._valid = await this._verify(time.now());
             } else {
-                const {valid, pow, interlinkHash, bodyHash} = await Crypto.blockVerify(this.serialize(), time.now());
+                const transactionValid = this.body.transactions.map(t => t._valid);
+                const {valid, pow, interlinkHash, bodyHash} = await Crypto.blockVerify(this.serialize(), transactionValid, time.now());
                 this._valid = valid;
                 this.header._pow = Hash.unserialize(new SerialBuffer(pow));
                 this.interlink._hash = Hash.unserialize(new SerialBuffer(interlinkHash));
@@ -98,7 +99,7 @@ class Block {
      * @param {number} timeNow
      * @returns {Promise.<boolean>}
      */
-    async computeVerify(timeNow) {
+    async _verify(timeNow) {
         // Check that the timestamp is not too far into the future.
         if (this._header.timestamp * 1000 > timeNow + Block.TIMESTAMP_DRIFT_MAX * 1000) {
             Log.w(Block, 'Invalid block - timestamp too far in the future');

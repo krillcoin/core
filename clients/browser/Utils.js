@@ -16,7 +16,7 @@ class Utils {
         } else {
             return Utils.awaitConsensus($)
                 .then(() => $.consensus.getAccount(address))
-                .then(account => account || Krill.Account.INITIAL);
+                .then(account => account || Krillcoin.Account.INITIAL);
         }
     }
 
@@ -50,21 +50,21 @@ class Utils {
     }
 
     static satoshisToCoins(value) {
-        return Krill.Policy.satoshisToCoins(value).toFixed(Math.log10(Krill.Policy.SATOSHIS_PER_COIN));
+        return Krillcoin.Policy.satoshisToCoins(value).toFixed(Math.log10(Krillcoin.Policy.SATOSHIS_PER_COIN));
     }
 
     static hash(data, algorithm) {
         switch (algorithm) {
-            case Krill.Hash.Algorithm.BLAKE2B: return Krill.Crypto.blake2bSync(data);
-            case Krill.Hash.Algorithm.SHA256: return Krill.Crypto.sha256(data);
-            // case Krill.Hash.Algorithm.ARGON2D intentionally omitted
+            case Krillcoin.Hash.Algorithm.BLAKE2B: return Krillcoin.Crypto.blake2bSync(data);
+            case Krillcoin.Hash.Algorithm.SHA256: return Krillcoin.Crypto.sha256(data);
+            // case Krillcoin.Hash.Algorithm.ARGON2D intentionally omitted
             default: throw new Error('Invalid hash algorithm');
         }
     }
 
     static readAddress(input) {
         try {
-            const address =  Krill.Address.fromUserFriendlyAddress(input.value);
+            const address =  Krillcoin.Address.fromUserFriendlyAddress(input.value);
             input.classList.remove('error');
             return address;
         } catch (e) {
@@ -86,7 +86,7 @@ class Utils {
 
     static readBase64(input) {
         try {
-            const buffer = Krill.BufferUtils.fromBase64(input.value);
+            const buffer = Krillcoin.BufferUtils.fromBase64(input.value);
             input.classList.remove('error');
             return buffer;
         } catch(e) {

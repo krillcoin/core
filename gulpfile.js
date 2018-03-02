@@ -93,7 +93,6 @@ const sources = {
         './src/main/generic/consensus/base/transaction/SignatureProof.js',
         './src/main/generic/consensus/base/transaction/BasicTransaction.js',
         './src/main/generic/consensus/base/transaction/ExtendedTransaction.js',
-        './src/main/generic/consensus/base/transaction/LegacyTransaction.js',
         './src/main/generic/consensus/base/transaction/TransactionsProof.js',
         './src/main/generic/consensus/base/transaction/TransactionCache.js',
         './src/main/generic/consensus/base/transaction/index/TransactionStoreEntry.js',
@@ -372,10 +371,10 @@ gulp.task('build-loader', function () {
             .pipe(source('babel-runtime.js'))
             .pipe(buffer())
             .pipe(sourcemaps.init()),
-        gulp.src(['./src/main/platform/browser/utils/WindowDetector.js', './src/main/platform/browser/Krill.js'])
+        gulp.src(['./src/main/platform/browser/utils/WindowDetector.js', './src/main/platform/browser/Krillcoin.js'])
             .pipe(sourcemaps.init())
             .pipe(babel(babel_loader)))
-        .pipe(concat('krill.js'))
+        .pipe(concat('krillcoin.js'))
         .pipe(uglify(uglify_config))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('dist'));
@@ -389,7 +388,7 @@ const NODE_SOURCES = [
 ];
 
 gulp.task('build-node', function () {
-    gulp.src(['build/Release/krill_node.node']).pipe(gulp.dest('dist'));
+    gulp.src(['build/Release/krillcoin_node.node']).pipe(gulp.dest('dist'));
     return gulp.src(NODE_SOURCES)
         .pipe(sourcemaps.init())
         .pipe(concat('node.js'))
@@ -399,7 +398,7 @@ gulp.task('build-node', function () {
 });
 
 gulp.task('build-node-istanbul', ['build-istanbul'], function () {
-    gulp.src(['build/Release/krill_node.node']).pipe(gulp.dest('dist'));
+    gulp.src(['build/Release/krillcoin_node.node']).pipe(gulp.dest('dist'));
     return gulp.src(NODE_SOURCES.map(f => `./.istanbul/${f}`))
         .pipe(sourcemaps.init())
         .pipe(concat('node-istanbul.js'))
@@ -448,7 +447,7 @@ gulp.task('serve', ['watch'], function () {
     connect.server({
         livereload: true,
         serverInit: function () {
-            util.log(util.colors.blue('Krill Blockchain Cockpit will be at http://localhost:8080/clients/browser/'));
+            util.log(util.colors.blue('Krillcoin Blockchain Cockpit will be at http://localhost:8080/clients/browser/'));
         }
     });
 });

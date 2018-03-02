@@ -1,4 +1,4 @@
-class MultiSigWalletCreationUi extends Krill.Observable {
+class MultiSigWalletCreationUi extends Krillcoin.Observable {
     constructor(el, $) {
         super();
         this.$el = el;
@@ -104,7 +104,7 @@ class MultiSigWalletCreationUi extends Krill.Observable {
         const signerWalletPromises = signerWalletAddresses.map(address => this.$.walletStore.get(address));
         Promise.all(signerWalletPromises).then(signerWallets => {
             const publicKeys = signerWallets.map(wallet => wallet.keyPair.publicKey);
-            multiSigWallet = Krill.MultiSigWallet.fromPublicKeys(signerWallets[0].keyPair, this._requiredSignerCount,
+            multiSigWallet = Krillcoin.MultiSigWallet.fromPublicKeys(signerWallets[0].keyPair, this._requiredSignerCount,
                 publicKeys);
             return this.$.walletStore.putMultiSig(multiSigWallet);
         }).then(() => {

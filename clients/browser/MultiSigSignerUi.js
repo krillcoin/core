@@ -72,9 +72,9 @@ class MultiSigSignerUi {
             return Promise.all(walletPromises);
         }).then(wallets => {
             const publicKeys = wallets.map(wallet => wallet.keyPair.publicKey);
-            const combinations = [...Krill.ArrayUtils.k_combinations(publicKeys, multiSigWallet.minSignatures)];
+            const combinations = [...Krillcoin.ArrayUtils.k_combinations(publicKeys, multiSigWallet.minSignatures)];
             const validCombination = combinations.find(combination => {
-                const aggregatedPublicKey = Krill.PublicKey.sum(combination);
+                const aggregatedPublicKey = Krillcoin.PublicKey.sum(combination);
                 return multiSigWallet.publicKeys.some(multiSigKey => multiSigKey.equals(aggregatedPublicKey));
             });
             if (!validCombination) return;

@@ -75,7 +75,7 @@ class HtlcSignerUi {
     }
 
     setAccount(address, account) {
-        if (account.type !== Krill.Account.Type.HTLC) throw Error('Not a HTLC account');
+        if (account.type !== Krillcoin.Account.Type.HTLC) throw Error('Not a HTLC account');
         this._htlcAddress = address;
         this._htlcSenderSigner.selectedSigner = account.sender;
         this._htlcRecipientSigner.selectedSigner = account.recipient;
@@ -86,16 +86,16 @@ class HtlcSignerUi {
         let proofType;
         switch (this.$proofType.value) {
             case HtlcSignerUi.ProofType.REGULAR_TRANSFER:
-                proofType = Krill.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER;
+                proofType = Krillcoin.HashedTimeLockedContract.ProofType.REGULAR_TRANSFER;
                 break;
             case HtlcSignerUi.ProofType.EARLY_RESOLVE:
-                proofType = Krill.HashedTimeLockedContract.ProofType.EARLY_RESOLVE;
+                proofType = Krillcoin.HashedTimeLockedContract.ProofType.EARLY_RESOLVE;
                 break;
             case HtlcSignerUi.ProofType.TIMEOUT_RESOLVE:
-                proofType = Krill.HashedTimeLockedContract.ProofType.TIMEOUT_RESOLVE;
+                proofType = Krillcoin.HashedTimeLockedContract.ProofType.TIMEOUT_RESOLVE;
                 break;
         }
-        const hashAlgorithm = Krill.Hash.Algorithm[this.$hashAlgorithm.value.toUpperCase()];
+        const hashAlgorithm = Krillcoin.Hash.Algorithm[this.$hashAlgorithm.value.toUpperCase()];
         const hashPreImage = this.$hashPreImage.value;
         const hashDepth = Utils.readNumber(this.$hashDepth);
         const hashCount = Utils.readNumber(this.$hashCount);
