@@ -10,7 +10,7 @@
 /clients/nodejs/light-consensus
 /clients/nodejs/wallet
 /clients/nodejs/localhost.*
-/dist/krill*
+/dist/krillcoin*
 /dist/worker.js*
 /dist/web*
 /dist/node*

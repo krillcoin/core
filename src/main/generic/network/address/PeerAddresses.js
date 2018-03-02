@@ -800,7 +800,7 @@ PeerAddresses.SEED_PEERS = [
     // WsPeerAddress.seed('seed3.krillcoin-network.com', 8080),
     // WsPeerAddress.seed('seed4.krillcoin-network.com', 8080),
     // WsPeerAddress.seed('emily.krillcoin-network.com', 443)
-    WsPeerAddress.seed('krillcoin-network.com', 8080, 'e65e39616662f2c16d62dc08915e5a1d104619db8c2b9cf9b389f96c8dce9837')
+    WsPeerAddress.seed('krillcoin-network.com', 8080, '1565694c612ab9b972451afc31fec1df6c45eef29710e3eef374f847525662e2')
 ];
 Class.register(PeerAddresses);
 

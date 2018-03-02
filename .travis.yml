@@ -16,13 +16,13 @@ before_install:
 # set up awscli packages
 - pip install --user awscli
 - mkdir -p ~/shared
-- if [ ! -z "$AWS_ACCESS_KEY_ID" ]; then aws s3 sync s3://krill-travis-builds/shared/$TRAVIS_BUILD_ID ~/shared --region eu-central-1; fi
+- if [ ! -z "$AWS_ACCESS_KEY_ID" ]; then aws s3 sync s3://krillcoin-travis-builds/shared/$TRAVIS_BUILD_ID ~/shared --region eu-central-1; fi
 
 install: true
 
 jobs:
   include:
-    - stage: build krill
+    - stage: build krillcoin
       env: BUILD=true
       script:
         - npm install -g gulp
@@ -31,8 +31,8 @@ jobs:
         - cp -r dist ~/shared
         - tar czf node_modules.tar.gz node_modules
         - cp node_modules.tar.gz ~/shared
-        - if [ ! -z "$AWS_ACCESS_KEY_ID" ]; then aws s3 sync ~/shared s3://krill-travis-builds/shared/$TRAVIS_BUILD_ID --region eu-central-1; fi
-    - stage: build krill
+        - if [ ! -z "$AWS_ACCESS_KEY_ID" ]; then aws s3 sync ~/shared s3://krillcoin-travis-builds/shared/$TRAVIS_BUILD_ID --region eu-central-1; fi
+    - stage: build krillcoin
       env: TO_TEST=ESLint
       script:
         - npm install -g gulp
@@ -51,7 +51,7 @@ jobs:
       env: TO_TEST=Karma/SauceLabs/Edge_16
       addons:
         sauce_connect:
-          username: krill
+          username: krillcoin
         jwt:
           secure: hoZJuHfZCCqD9umU2EbOlfcgLOhNjUJpkTHVVHny/CEjsonRcMO3+2dyASq1MspkhP+0au1KLXpKjvprkli8SMgNrrx35hyVVMw7p8Le0Flwmj+8oJkSqeUnJhfTRhcun0HB9lSILRpaQqW8eEgLQSlFf6uVQdk+rXcFPy/ZkM+PBZRwzlmdr1jtMQR0F+Iv/wz0ORy9GWA6hdpOqw8A0G3nnQqe9zZ8OdIXiVm/8ch8+hL4bGz6BoBC1kkhi1ia2Ne5KFSOEhz8P92S9K6IPSS+VqiZCZnOo/2alDQ4DniElskEliN1edhqOT4GCq29MfLZzV+xDqfRkcXwSbP0+t7QtHRG7ZW2cOHAPuyNlrdyWycVhB9Tp0khyHNxu3bK8HluCu0q2ZEpdZqQQvKPYJtaS/OmVszYFlj0RqDE1ZsrCCtpyawtqsvPrNPWcES3mro5P97884FFXX5Lou8QJkjm+rsHOxdHcONwz+b6TDRa4JQuubkglF9aeTHXgk0a6mpPcNDDEDNKQsaI99kAGxUbDSEDJ+Kc/t0ndZZ2L+OyrchgOajsRNopoUfopf3eOvGwGA6uQxGgQqLUueW2WNYI1Fh96RCYaZUCexh1hy24+LQLFzRYqxMQyMma11nSBsUudJoYk+ExI9GZgI8co7SxTxq0wh1wTFPv4Odcv50=
       script: ./travis-script.sh
@@ -59,7 +59,7 @@ jobs:
       env: TO_TEST=Karma/SauceLabs/Safari_11 EXCLUDE_MINER=true
       addons:
         sauce_connect:
-          username: krill
+          username: krillcoin
         jwt:
           secure: hoZJuHfZCCqD9umU2EbOlfcgLOhNjUJpkTHVVHny/CEjsonRcMO3+2dyASq1MspkhP+0au1KLXpKjvprkli8SMgNrrx35hyVVMw7p8Le0Flwmj+8oJkSqeUnJhfTRhcun0HB9lSILRpaQqW8eEgLQSlFf6uVQdk+rXcFPy/ZkM+PBZRwzlmdr1jtMQR0F+Iv/wz0ORy9GWA6hdpOqw8A0G3nnQqe9zZ8OdIXiVm/8ch8+hL4bGz6BoBC1kkhi1ia2Ne5KFSOEhz8P92S9K6IPSS+VqiZCZnOo/2alDQ4DniElskEliN1edhqOT4GCq29MfLZzV+xDqfRkcXwSbP0+t7QtHRG7ZW2cOHAPuyNlrdyWycVhB9Tp0khyHNxu3bK8HluCu0q2ZEpdZqQQvKPYJtaS/OmVszYFlj0RqDE1ZsrCCtpyawtqsvPrNPWcES3mro5P97884FFXX5Lou8QJkjm+rsHOxdHcONwz+b6TDRa4JQuubkglF9aeTHXgk0a6mpPcNDDEDNKQsaI99kAGxUbDSEDJ+Kc/t0ndZZ2L+OyrchgOajsRNopoUfopf3eOvGwGA6uQxGgQqLUueW2WNYI1Fh96RCYaZUCexh1hy24+LQLFzRYqxMQyMma11nSBsUudJoYk+ExI9GZgI8co7SxTxq0wh1wTFPv4Odcv50=
       script: ./travis-script.sh
@@ -67,7 +67,7 @@ jobs:
 #      env: TO_TEST=Karma/SauceLabs/Safari_10.1 USE_BABEL=1
 #      addons:
 #        sauce_connect:
-#          username: krill
+#          username: krillcoin
 #        jwt:
 #          secure: hoZJuHfZCCqD9umU2EbOlfcgLOhNjUJpkTHVVHny/CEjsonRcMO3+2dyASq1MspkhP+0au1KLXpKjvprkli8SMgNrrx35hyVVMw7p8Le0Flwmj+8oJkSqeUnJhfTRhcun0HB9lSILRpaQqW8eEgLQSlFf6uVQdk+rXcFPy/ZkM+PBZRwzlmdr1jtMQR0F+Iv/wz0ORy9GWA6hdpOqw8A0G3nnQqe9zZ8OdIXiVm/8ch8+hL4bGz6BoBC1kkhi1ia2Ne5KFSOEhz8P92S9K6IPSS+VqiZCZnOo/2alDQ4DniElskEliN1edhqOT4GCq29MfLZzV+xDqfRkcXwSbP0+t7QtHRG7ZW2cOHAPuyNlrdyWycVhB9Tp0khyHNxu3bK8HluCu0q2ZEpdZqQQvKPYJtaS/OmVszYFlj0RqDE1ZsrCCtpyawtqsvPrNPWcES3mro5P97884FFXX5Lou8QJkjm+rsHOxdHcONwz+b6TDRa4JQuubkglF9aeTHXgk0a6mpPcNDDEDNKQsaI99kAGxUbDSEDJ+Kc/t0ndZZ2L+OyrchgOajsRNopoUfopf3eOvGwGA6uQxGgQqLUueW2WNYI1Fh96RCYaZUCexh1hy24+LQLFzRYqxMQyMma11nSBsUudJoYk+ExI9GZgI8co7SxTxq0wh1wTFPv4Odcv50=
 #      script: ./travis-script.sh
@@ -102,7 +102,7 @@ jobs:
 #      env: TO_TEST=Karma/SauceLabs/Chrome_Old
 #      addons:
 #        sauce_connect:
-#          username: krill
+#          username: krillcoin
 #        jwt:
 #          secure: hoZJuHfZCCqD9umU2EbOlfcgLOhNjUJpkTHVVHny/CEjsonRcMO3+2dyASq1MspkhP+0au1KLXpKjvprkli8SMgNrrx35hyVVMw7p8Le0Flwmj+8oJkSqeUnJhfTRhcun0HB9lSILRpaQqW8eEgLQSlFf6uVQdk+rXcFPy/ZkM+PBZRwzlmdr1jtMQR0F+Iv/wz0ORy9GWA6hdpOqw8A0G3nnQqe9zZ8OdIXiVm/8ch8+hL4bGz6BoBC1kkhi1ia2Ne5KFSOEhz8P92S9K6IPSS+VqiZCZnOo/2alDQ4DniElskEliN1edhqOT4GCq29MfLZzV+xDqfRkcXwSbP0+t7QtHRG7ZW2cOHAPuyNlrdyWycVhB9Tp0khyHNxu3bK8HluCu0q2ZEpdZqQQvKPYJtaS/OmVszYFlj0RqDE1ZsrCCtpyawtqsvPrNPWcES3mro5P97884FFXX5Lou8QJkjm+rsHOxdHcONwz+b6TDRa4JQuubkglF9aeTHXgk0a6mpPcNDDEDNKQsaI99kAGxUbDSEDJ+Kc/t0ndZZ2L+OyrchgOajsRNopoUfopf3eOvGwGA6uQxGgQqLUueW2WNYI1Fh96RCYaZUCexh1hy24+LQLFzRYqxMQyMma11nSBsUudJoYk+ExI9GZgI8co7SxTxq0wh1wTFPv4Odcv50=
 #      script: ./travis-script.sh
