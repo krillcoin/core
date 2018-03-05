@@ -1,7 +1,7 @@
 class NetworkAgent extends Observable {
     /**
      * @param {IBlockchain} blockchain
-     * @param {PeerAddresses} addresses
+     * @param {PeerAddressBook} addresses
      * @param {NetworkConfig} networkConfig
      * @param {PeerChannel} channel
      *
@@ -17,7 +17,7 @@ class NetworkAgent extends Observable {
         super();
         /** @type {IBlockchain} */
         this._blockchain = blockchain;
-        /** @type {PeerAddresses} */
+        /** @type {PeerAddressBook} */
         this._addresses = addresses;
         /** @type {NetworkConfig} */
         this._networkConfig = networkConfig;
@@ -81,12 +81,6 @@ class NetworkAgent extends Observable {
         this._versionAttempts = 0;
 
         /**
-         * @type {PeerAddress}
-         * @private
-         */
-        this._observedPeerAddress = null;
-
-        /**
          * @type {boolean}
          * @private
          */
@@ -97,6 +91,12 @@ class NetworkAgent extends Observable {
          * @private
          */
         this._peerChallengeNonce = null;
+
+        /**
+         * @type {Map.<number, number>}
+         * @private
+         */
+        this._pingTimes = new Map();
 
         /** @type {Uint8Array} */
         this._challengeNonce = new Uint8Array(VersionMessage.CHALLENGE_SIZE);
@@ -111,7 +111,7 @@ class NetworkAgent extends Observable {
         channel.on('pong', msg => this._onPong(msg));
 
         // Clean up when the peer disconnects.
-        channel.on('close', closedByRemote => this._onClose(closedByRemote));
+        channel.on('close', () => this._onClose());
     }
 
     /**
@@ -127,7 +127,7 @@ class NetworkAgent extends Observable {
         // the peer knows is older than RELAY_THROTTLE, relay the address again.
         const filteredAddresses = addresses.filter(addr => {
             // Exclude RTC addresses that are already at MAX_DISTANCE.
-            if (addr.protocol === Protocol.RTC && addr.distance >= PeerAddresses.MAX_DISTANCE) {
+            if (addr.protocol === Protocol.RTC && addr.distance >= PeerAddressBook.MAX_DISTANCE) {
                 return false;
             }
 
@@ -166,7 +166,7 @@ class NetworkAgent extends Observable {
         if (!this._channel.version(this._networkConfig.peerAddress, this._blockchain.headHash, this._challengeNonce)) {
             this._versionAttempts++;
             if (this._versionAttempts >= NetworkAgent.VERSION_ATTEMPTS_MAX) {
-                this._channel.close('sending of version message failed');
+                this._channel.close(CloseType.SENDING_OF_VERSION_MESSAGE_FAILED, 'sending of version message failed');
                 return;
             }
 
@@ -182,7 +182,7 @@ class NetworkAgent extends Observable {
             // TODO Should we ban instead?
             this._timers.setTimeout('version', () => {
                 this._timers.clearTimeout('version');
-                this._channel.close('version timeout');
+                this._channel.close(CloseType.VERSION_TIMEOUT, 'version timeout');
             }, NetworkAgent.HANDSHAKE_TIMEOUT);
         } else if (this._peerAddressVerified) {
             this._sendVerAck();
@@ -190,7 +190,7 @@ class NetworkAgent extends Observable {
 
         this._timers.setTimeout('verack', () => {
             this._timers.clearTimeout('verack');
-            this._channel.close('verack timeout');
+            this._channel.close(CloseType.VERACK_TIMEOUT, 'verack timeout');
         }, NetworkAgent.HANDSHAKE_TIMEOUT);
     }
 
@@ -210,7 +210,7 @@ class NetworkAgent extends Observable {
 
         // Ignore duplicate version messages.
         if (this._versionReceived) {
-            Log.d(NetworkAgent, () => `Ignoring duplicate version message from ${this._observedPeerAddress}`);
+            Log.d(NetworkAgent, () => `Ignoring duplicate version message from ${this._channel.peerAddress}`);
             return;
         }
 
@@ -220,19 +220,19 @@ class NetworkAgent extends Observable {
         // Check if the peer is running a compatible version.
         if (!Version.isCompatible(msg.version)) {
             this._channel.reject(Message.Type.VERSION, RejectMessage.Code.REJECT_OBSOLETE, `incompatible version (ours=${Version.CODE}, theirs=${msg.version})`);
-            this._channel.ban(`incompatible version (ours=${Version.CODE}, theirs=${msg.version})`);
+            this._channel.close(CloseType.INCOMPATIBLE_VERSION, `incompatible version (ours=${Version.CODE}, theirs=${msg.version})`);
             return;
         }
 
         // Check if the peer is working on the same genesis block.
         if (!Block.GENESIS.HASH.equals(msg.genesisHash)) {
-            this._channel.ban(`different genesis block (${msg.genesisHash})`);
+            this._channel.close(CloseType.DIFFERENT_GENESIS_BLOCK, `different genesis block (${msg.genesisHash})`);
             return;
         }
 
         // Check that the given peerAddress is correctly signed.
         if (!msg.peerAddress.verifySignature()) {
-            this._channel.ban('invalid peerAddress in version message');
+            this._channel.close(CloseType.INVALID_PEER_ADDRESS_IN_VERSION_MESSAGE, 'invalid peerAddress in version message');
             return;
         }
 
@@ -241,25 +241,26 @@ class NetworkAgent extends Observable {
         // Check that the given peerAddress matches the one we expect.
         // In case of inbound WebSocket connections, this is the first time we
         // see the remote peer's peerAddress.
-        // TODO We should validate that the given peerAddress actually resolves
-        // to the peer's netAddress!
+        const peerAddress = msg.peerAddress;
         if (this._channel.peerAddress) {
-            if (!this._channel.peerAddress.equals(msg.peerAddress)) {
-                this._channel.ban('unexpected peerAddress in version message');
+            if (!this._channel.peerAddress.equals(peerAddress)) {
+                this._channel.close(CloseType.UNEXPECTED_PEER_ADDRESS_IN_VERSION_MESSAGE, 'unexpected peerAddress in version message');
                 return;
             }
             this._peerAddressVerified = true;
         }
 
         // The client might not send its netAddress. Set it from our address database if we have it.
-        this._observedPeerAddress = msg.peerAddress;
-        if (!this._observedPeerAddress.netAddress) {
+        if (!peerAddress.netAddress || peerAddress.netAddress.isPseudo()) {
             /** @type {PeerAddress} */
-            const storedAddress = this._addresses.get(this._observedPeerAddress);
+            const storedAddress = this._addresses.get(peerAddress);
             if (storedAddress && storedAddress.netAddress) {
-                this._observedPeerAddress.netAddress = storedAddress.netAddress;
+                peerAddress.netAddress = storedAddress.netAddress;
             }
         }
+
+        // Set/update the channel's peer address.
+        this._channel.peerAddress = peerAddress;
 
         // Create peer object. Since the initial version message received from the
         // peer contains their local timestamp, we can use it to calculate their
@@ -268,11 +269,20 @@ class NetworkAgent extends Observable {
             this._channel,
             msg.version,
             msg.headHash,
-            this._observedPeerAddress.timestamp - now
+            peerAddress.timestamp - now
         );
 
         this._peerChallengeNonce = msg.challengeNonce;
         this._versionReceived = true;
+
+        // Tell listeners that we received this peer's version information.
+        // Listeners registered to this event might close the connection to this peer.
+        this.fire('version', this._peer, this);
+
+        // Abort handshake if the connection was closed.
+        if (this._channel.closed) {
+            return;
+        }
 
         if (!this._versionSent) {
             this.handshake();
@@ -291,7 +301,7 @@ class NetworkAgent extends Observable {
     _sendVerAck() {
         Assert.that(this._peerAddressVerified);
 
-        const data = BufferUtils.concatTypedArrays(this._observedPeerAddress.peerId.serialize(), this._peerChallengeNonce);
+        const data = BufferUtils.concatTypedArrays(this._channel.peerAddress.peerId.serialize(), this._peerChallengeNonce);
         const signature = Signature.create(this._networkConfig.keyPair.privateKey, this._networkConfig.keyPair.publicKey, data);
         this._channel.verack(this._networkConfig.keyPair.publicKey, signature);
 
@@ -303,7 +313,7 @@ class NetworkAgent extends Observable {
      * @private
      */
     _onVerAck(msg) {
-        Log.d(NetworkAgent, () => `[VERACK] from ${this._observedPeerAddress}`);
+        Log.d(NetworkAgent, () => `[VERACK] from ${this._channel.peerAddress}`);
 
         // Make sure this is a valid message in our current state.
         if (!this._canAcceptMessage(msg)) {
@@ -312,7 +322,7 @@ class NetworkAgent extends Observable {
 
         // Ignore duplicate verack messages.
         if (this._verackReceived) {
-            Log.d(NetworkAgent, () => `Ignoring duplicate verack message from ${this._observedPeerAddress}`);
+            Log.d(NetworkAgent, () => `Ignoring duplicate verack message from ${this._channel.peerAddress}`);
             return;
         }
 
@@ -320,15 +330,15 @@ class NetworkAgent extends Observable {
         this._timers.clearTimeout('verack');
 
         // Verify public key
-        if (!msg.publicKey.toPeerId().equals(this._observedPeerAddress.peerId)) {
-            this._channel.ban('Invalid public key in verack message');
+        if (!msg.publicKey.toPeerId().equals(this._channel.peerAddress.peerId)) {
+            this._channel.close(CloseType.INVALID_PUBLIC_KEY_IN_VERACK_MESSAGE, 'Invalid public key in verack message');
             return;
         }
 
         // Verify signature
         const data = BufferUtils.concatTypedArrays(this._networkConfig.peerAddress.peerId.serialize(), this._challengeNonce);
         if (!msg.signature.verify(msg.publicKey, data)) {
-            this._channel.ban('Invalid signature in verack message');
+            this._channel.close(CloseType.INVALID_SIGNATURE_IN_VERACK_MESSAGE, 'Invalid signature in verack message');
             return;
         }
 
@@ -336,8 +346,6 @@ class NetworkAgent extends Observable {
             this._peerAddressVerified = true;
             this._sendVerAck();
         }
-
-        this._channel.peerAddress = this._observedPeerAddress;
 
         // Remember that the peer has sent us this address.
         this._knownAddresses.add(this._channel.peerAddress);
@@ -361,7 +369,7 @@ class NetworkAgent extends Observable {
             () => this._channel.addr([this._networkConfig.peerAddress]),
             NetworkAgent.ANNOUNCE_ADDR_INTERVAL);
 
-        // Tell listeners about the new peer that connected.
+        // Tell listeners that the handshake with this peer succeeded.
         this.fire('handshake', this._peer, this);
 
         // Request new network addresses from the peer.
@@ -392,18 +400,18 @@ class NetworkAgent extends Observable {
         // Reject messages that contain more than 1000 addresses, ban peer (bitcoin).
         if (msg.addresses.length > 1000) {
             Log.w(NetworkAgent, 'Rejecting addr message - too many addresses');
-            this._channel.ban('addr message too large');
+            this._channel.close(CloseType.ADDR_MESSAGE_TOO_LARGE, 'addr message too large');
             return;
         }
 
         // Remember that the peer has sent us these addresses.
         for (const addr of msg.addresses) {
             if (!addr.verifySignature()) {
-                this._channel.ban('invalid addr');
+                this._channel.close(CloseType.INVALID_ADDR, 'invalid addr');
                 return;
             }
             if (addr.protocol === Protocol.WS && !addr.globallyReachable()) {
-                this._channel.ban('addr not globally reachable');
+                this._channel.close(CloseType.ADDR_NOT_GLOBALLY_REACHABLE, 'addr not globally reachable');
                 return;
             }
             this._knownAddresses.add(addr);
@@ -432,7 +440,7 @@ class NetworkAgent extends Observable {
 
         const filteredAddresses = addresses.filter(addr => {
             // Exclude RTC addresses that are already at MAX_DISTANCE.
-            if (addr.protocol === Protocol.RTC && addr.distance >= PeerAddresses.MAX_DISTANCE) {
+            if (addr.protocol === Protocol.RTC && addr.distance >= PeerAddressBook.MAX_DISTANCE) {
                 return false;
             }
 
@@ -458,14 +466,18 @@ class NetworkAgent extends Observable {
         // Send ping message to peer.
         // If sending the ping message fails, assume the connection has died.
         if (!this._channel.ping(nonce)) {
-            this._channel.close('sending ping message failed');
+            this._channel.close(CloseType.SENDING_PING_MESSAGE_FAILED, 'sending ping message failed');
             return;
         }
+
+        // Save ping timestamp to detect the speed of the connection
+        this._pingTimes.set(nonce, Date.now());
 
         // Drop peer if it doesn't answer with a matching pong message within the timeout.
         this._timers.setTimeout(`ping_${nonce}`, () => {
             this._timers.clearTimeout(`ping_${nonce}`);
-            this._channel.fail('ping timeout');
+            this._channel.close(CloseType.PING_TIMEOUT, 'ping timeout');
+            this._pingTimes.delete(nonce);
         }, NetworkAgent.PING_TIMEOUT);
     }
 
@@ -485,23 +497,30 @@ class NetworkAgent extends Observable {
 
     /**
      * @param {PongMessage} msg
+     * @fires NetworkAgent#ping-pong
      * @private
      */
     _onPong(msg) {
         // Clear the ping timeout for this nonce.
         this._timers.clearTimeout(`ping_${msg.nonce}`);
+
+        /** @type {number} */
+        const startTime = this._pingTimes.get(msg.nonce);
+        if (startTime) {
+            const delta = Date.now() - startTime;
+            if (delta > 0) {
+                this.fire('ping-pong', delta);
+            }
+            this._pingTimes.delete(msg.nonce);
+        }
     }
 
     /**
-     * @param {boolean} closedByRemote
      * @private
      */
-    _onClose(closedByRemote) {
+    _onClose() {
         // Clear all timers and intervals when the peer disconnects.
         this._timers.clearAll();
-
-        // Tell listeners that the peer has disconnected.
-        this.fire('close', this._peer, this._channel, closedByRemote, this);
     }
 
     /**

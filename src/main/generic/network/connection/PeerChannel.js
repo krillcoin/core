@@ -1,7 +1,7 @@
 class PeerChannel extends Observable {
     /**
-     * @listens PeerConnection#message
-     * @param {PeerConnection} connection
+     * @listens NetworkConnection#message
+     * @param {NetworkConnection} connection
      */
     constructor(connection) {
         super();
@@ -9,7 +9,7 @@ class PeerChannel extends Observable {
         this._conn.on('message', msg => this._onMessage(msg));
 
         // Forward specified events on the connection to listeners of this Observable.
-        this.bubble(this._conn, 'close', 'error', 'ban');
+        this.bubble(this._conn, 'close', 'error');
     }
 
     /**
@@ -20,8 +20,9 @@ class PeerChannel extends Observable {
         let msg = null, type = null;
 
         try {
-            type = MessageFactory.peekType(rawMsg);
-            msg = MessageFactory.parse(rawMsg);
+            const buf = new SerialBuffer(rawMsg);
+            type = MessageFactory.peekType(buf);
+            msg = MessageFactory.parse(buf);
         } catch(e) {
             Log.w(PeerChannel, `Failed to parse message from ${this.peerAddress || this.netAddress}`, e.message || e);
 
@@ -33,7 +34,7 @@ class PeerChannel extends Observable {
             // If the message does not make sense at a whole or we fear to get into a reject loop,
             // we ban the peer instead.
             if (!type || type === Message.Type.REJECT) {
-                this.ban('Failed to parse message type');
+                this.close(CloseType.FAILED_TO_PARSE_MESSAGE_TYPE, 'Failed to parse message type');
                 return;
             }
 
@@ -46,6 +47,7 @@ class PeerChannel extends Observable {
 
         try {
             this.fire(PeerChannel.Event[msg.type], msg, this);
+            this.fire('message-log', msg, this);
         } catch (e) {
             Log.w(PeerChannel, `Error while processing ${msg.type} message from ${this.peerAddress || this.netAddress}: ${e}`);
         }
@@ -79,24 +81,11 @@ class PeerChannel extends Observable {
     }
 
     /**
+     * @param {number} [type]
      * @param {string} [reason]
      */
-    close(reason) {
-        this._conn.close(reason);
-    }
-
-    /**
-     * @param {string} [reason]
-     */
-    ban(reason) {
-        this._conn.ban(reason);
-    }
-
-    /**
-     * @param {string} [reason]
-     */
-    fail(reason) {
-        this._conn.fail(reason);
+    close(type, reason) {
+        this._conn.close(type, reason);
     }
 
     /**
@@ -367,7 +356,7 @@ class PeerChannel extends Observable {
         return `PeerChannel{conn=${this._conn}}`;
     }
 
-    /** @type {PeerConnection} */
+    /** @type {NetworkConnection} */
     get connection() {
         return this._conn;
     }

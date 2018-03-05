@@ -20,3 +20,5 @@
 /database
 /build
 /.istanbul/
+settings.json
+/coverage

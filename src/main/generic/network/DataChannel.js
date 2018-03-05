@@ -76,7 +76,8 @@ class DataChannel extends Observable {
      * @param {string} msg
      * @private
      */
-    _onError(msg) {
+    _error(msg) {
+        this.fire('error', msg, this);
         Log.e(DataChannel, msg);
         this.close();
     }
@@ -87,18 +88,20 @@ class DataChannel extends Observable {
      */
     _onMessage(msg) {
         try {
-            // Blindly forward empty messages.
-            // TODO should we drop them instead?
+            // Drop message if the channel is not open.
+            if (this.readyState !== DataChannel.ReadyState.OPEN) {
+                return;
+            }
+
+            // Drop empty messages.
             const buffer = new SerialBuffer(msg);
             if (buffer.byteLength === 0) {
-                Log.w(DataChannel, 'Received empty message', buffer, msg);
-                this.fire('message', msg, this);
                 return;
             }
 
             // Chunk is too large.
             if (buffer.byteLength > DataChannel.CHUNK_SIZE_MAX) {
-                this._onError('Received chunk larger than maximum chunk size, discarding');
+                this._error('Received chunk larger than maximum chunk size, discarding');
                 return;
             }
 
@@ -114,7 +117,7 @@ class DataChannel extends Observable {
                 const messageSize = Message.peekLength(chunkBuffer);
 
                 if (messageSize > DataChannel.MESSAGE_SIZE_MAX) {
-                    this._onError(`Received message with excessive message size ${messageSize} > ${DataChannel.MESSAGE_SIZE_MAX}`);
+                    this._error(`Received message with excessive message size ${messageSize} > ${DataChannel.MESSAGE_SIZE_MAX}`);
                     return;
                 }
 
@@ -130,7 +133,7 @@ class DataChannel extends Observable {
 
             // Currently, we only support one message at a time.
             if (tag !== this._receivingTag) {
-                this._onError(`Received message with wrong message tag ${tag}, expected ${this._receivingTag}`);
+                this._error(`Received message with wrong message tag ${tag}, expected ${this._receivingTag}`);
                 return;
             }
 
@@ -138,7 +141,7 @@ class DataChannel extends Observable {
 
             // Mismatch between buffer sizes.
             if (effectiveChunkLength > remainingBytes) {
-                this._onError('Received chunk larger than remaining bytes to read, discarding');
+                this._error('Received chunk larger than remaining bytes to read, discarding');
                 return;
             }
 
@@ -167,7 +170,7 @@ class DataChannel extends Observable {
                 this.fire('chunk', this._buffer);
             }
         } catch (e) {
-            this._onError(`Error occured while parsing incoming message, ${e.message}`);
+            this._error(`Error occurred while parsing incoming message, ${e.message}`);
         }
     }
 

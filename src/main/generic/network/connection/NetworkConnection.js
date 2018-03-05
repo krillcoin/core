@@ -1,4 +1,4 @@
-class PeerConnection extends Observable {
+class NetworkConnection extends Observable {
     /**
      * @param {DataChannel} channel
      * @param {number} protocol
@@ -24,18 +24,20 @@ class PeerConnection extends Observable {
 
         /** @type {boolean} */
         this._inbound = !peerAddress;
-        /** @type {boolean} */
-        this._closedByUs = false;
+
         /** @type {boolean} */
         this._closed = false;
 
+        /** @type {*} */
+        this._lastError = null;
+
         // Unique id for this connection.
         /** @type {number} */
-        this._id = PeerConnection._instanceCount++;
+        this._id = NetworkConnection._instanceCount++;
 
         this._channel.on('message', msg => this._onMessage(msg));
-        this._channel.on('close', () => this._onClose());
-        this._channel.on('error', e => this.fire('error', e, this));
+        this._channel.on('close', () => this._onClose(CloseType.CLOSED_BY_REMOTE, 'Closed by remote'));
+        this._channel.on('error', e => this._onError(e));
     }
 
     _onMessage(msg) {
@@ -48,7 +50,21 @@ class PeerConnection extends Observable {
         this.fire('message', msg, this);
     }
 
-    _onClose() {
+    /**
+     * @param {*} e
+     * @private
+     */
+    _onError(e) {
+        this._lastError = e;
+        this.fire('error', e, this);
+    }
+
+    /**
+     * @param {number} [type]
+     * @param {string} [reason]
+     * @private
+     */
+    _onClose(type, reason) {
         // Don't fire close event again when already closed.
         if (this._closed) {
             return;
@@ -57,15 +73,24 @@ class PeerConnection extends Observable {
         // Mark this connection as closed.
         this._closed = true;
 
+        // Propagate last network error.
+        if (type === CloseType.CLOSED_BY_REMOTE && this._lastError) {
+            type = CloseType.NETWORK_ERROR;
+            reason = this._lastError;
+        }
+
         // Tell listeners that this connection has closed.
-        this.fire('close', !this._closedByUs, this);
+        this.fire('close', type, reason, this);
     }
 
-    _close() {
-        this._closedByUs = true;
-
+    /**
+     * @param {number} [type]
+     * @param {string} [reason]
+     * @private
+     */
+    _close(type, reason) {
         // Don't wait for the native close event to fire.
-        this._onClose();
+        this._onClose(type, reason);
 
         // Close the native channel.
         this._channel.close();
@@ -107,14 +132,14 @@ class PeerConnection extends Observable {
 
         // Fire close event (early) if channel is closing/closed.
         if (this._isChannelClosing() || this._isChannelClosed()) {
-            Log.w(PeerConnection, `Not sending data to ${logAddress} - channel closing/closed (${this._channel.readyState})`);
+            Log.w(NetworkConnection, `Not sending data to ${logAddress} - channel closing/closed (${this._channel.readyState})`);
             this._onClose();
             return false;
         }
 
         // Don't attempt to send if channel is not (yet) open.
         if (!this._isChannelOpen()) {
-            Log.w(PeerConnection, `Not sending data to ${logAddress} - channel not open (${this._channel.readyState})`);
+            Log.w(NetworkConnection, `Not sending data to ${logAddress} - channel not open (${this._channel.readyState})`);
             return false;
         }
 
@@ -123,7 +148,7 @@ class PeerConnection extends Observable {
             this._bytesSent += msg.byteLength || msg.length;
             return true;
         } catch (e) {
-            Log.e(PeerConnection, `Failed to send data to ${logAddress}: ${e.message || e}`);
+            Log.e(NetworkConnection, `Failed to send data to ${logAddress}: ${e.message || e}`);
             return false;
         }
     }
@@ -147,38 +172,21 @@ class PeerConnection extends Observable {
     }
 
     /**
+     * @param {number} [type]
      * @param {string} [reason]
      */
-    close(reason) {
+    close(type, reason) {
         const connType = this._inbound ? 'inbound' : 'outbound';
-        Log.d(PeerConnection, `Closing ${connType} connection #${this._id} ${this._peerAddress || this._netAddress}` + (reason ? ` - ${reason}` : ''));
-        this._close();
+        Log.d(NetworkConnection, `Closing ${connType} connection #${this._id} ${this._peerAddress || this._netAddress}` + (reason ? ` - ${reason}` : '') + ` (${type})`);
+        this._close(type, reason);
     }
 
     /**
-     * @param {string} [reason]
-     */
-    ban(reason) {
-        Log.w(PeerConnection, `Banning peer ${this._peerAddress || this._netAddress}` + (reason ? ` - ${reason}` : ''));
-        this._close();
-        this.fire('ban', reason, this);
-    }
-
-    /**
-     * @param {string} [reason]
-     */
-    fail(reason) {
-        Log.w(PeerConnection, `Network failure on peer ${this._peerAddress || this._netAddress}` + (reason ? ` - ${reason}` : ''));
-        this._close();
-        this.fire('fail', reason, this);
-    }
-
-    /**
-     * @param {PeerConnection} o
+     * @param {NetworkConnection} o
      * @return {boolean}
      */
     equals(o) {
-        return o instanceof PeerConnection
+        return o instanceof NetworkConnection
             && this._id === o.id;
     }
 
@@ -193,7 +201,7 @@ class PeerConnection extends Observable {
      * @return {string}
      */
     toString() {
-        return `PeerConnection{id=${this._id}, protocol=${this._protocol}, peerAddress=${this._peerAddress}, netAddress=${this._netAddress}}`;
+        return `NetworkConnection{id=${this._id}, protocol=${this._protocol}, peerAddress=${this._peerAddress}, netAddress=${this._netAddress}}`;
     }
 
     /** @type {number} */
@@ -251,6 +259,6 @@ class PeerConnection extends Observable {
         return this._closed;
     }
 }
-// Used to generate unique PeerConnection ids.
-PeerConnection._instanceCount = 0;
-Class.register(PeerConnection);
+// Used to generate unique NetworkConnection ids.
+NetworkConnection._instanceCount = 0;
+Class.register(NetworkConnection);
