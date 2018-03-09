@@ -5,7 +5,7 @@
 #include "blake2.h"
 #include "sha256.h"
 
-#define KRILLCOIN_ARGON2_SALT "krillcoinrocks!"
+#define KRILLCOIN_ARGON2_SALT "nimiqrocks!"
 #define KRILLCOIN_ARGON2_SALT_LEN 11
 #define KRILLCOIN_DEFAULT_ARGON2_COST 512
 
